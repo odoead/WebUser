@@ -1,0 +1,107 @@
+﻿AttributeName 
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+	добавить AttributeValue к AttributeName
+	удалить AttributeValue у AttributeName
+
+AttributeValue
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+
+Cart
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+	добавить в корзину товар
+	удалить из корзины товар
+
+CartItem
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+	изенить количество товара
+
+Category
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+	добавить AttributeName к Category
+	удалить AttributeName у Category
+	показать все дочерние категории
+	показать дочерние категории 1го порядка
+
+Coupon- скидка при заказе на весь заказ
+	добавить скидку в значениях
+	добавить скидку в проценте
+	удалить 
+	обновить
+	getbyid
+	getall
+	getallbyuser
+	getallbyorder
+
+Discount -скидка при заказе на каждый товар отдельно  
+	обновить
+	getbyid
+	getbyorder
+	getall
+
+Image 
+	добавить
+	удалить
+	getbyProduct
+	getbyid
+	getall
+
+Order	 
+	добавить
+	
+	удалить 
+	getbyid
+	getbyUserid
+	getall
+		активировать купон в заказе
+OrderProduct
+	добавить 
+	удалить 
+	getbyOrder
+	getbyid
+	getall
+
+Point скидка при заказе на весь заказ,может иметь огрниченое время
+	добавить бонусы пользователю
+	списать бонусы у пользователя при заказе 
+	удалить 
+	getbyUser
+	getbyid
+	getall
+
+Promotion- скидка по определенным характеристикам(AttributeName/category/attributeValue) 
+	добавить
+	удалить 
+	обновить
+	getbyid
+	getall
+	Управление условиями применения скидки: Некоторые скидки могут иметь специальные условия, такие как минимальная сумма заказа, определенные товары в корзине и т. д. Это позволяет управлять этими условиями.
+Product 
+	добавить
+	добавить discount
+	удалить discount 
+	добавить image
+	удалить добавить
+	удалить 
+	обновить
+	getbyid
+	getall

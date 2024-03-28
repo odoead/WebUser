@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUser", "WebUser\WebUser.csproj", "{8BD0D8A4-3CB5-4BB8-8119-9F9093FF4EEB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B19CEA23-B378-4767-A1C3-1812263F1A7E} = {B19CEA23-B378-4767-A1C3-1812263F1A7E}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggerService", "ClassLibrary2\LoggerService.csproj", "{B19CEA23-B378-4767-A1C3-1812263F1A7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BD0D8A4-3CB5-4BB8-8119-9F9093FF4EEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BD0D8A4-3CB5-4BB8-8119-9F9093FF4EEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BD0D8A4-3CB5-4BB8-8119-9F9093FF4EEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BD0D8A4-3CB5-4BB8-8119-9F9093FF4EEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B19CEA23-B378-4767-A1C3-1812263F1A7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B19CEA23-B378-4767-A1C3-1812263F1A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B19CEA23-B378-4767-A1C3-1812263F1A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B19CEA23-B378-4767-A1C3-1812263F1A7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F89E9694-5CC5-47C0-A1C9-F1ACDF36EF59}
+	EndGlobalSection
+EndGlobal
