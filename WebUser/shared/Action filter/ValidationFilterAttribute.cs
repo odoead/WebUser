@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace WebUser.shared
@@ -9,9 +9,7 @@ namespace WebUser.shared
         {
             var action = context.RouteData.Values["action"];
             var controller = context.RouteData.Values["controller"];
-
-            var param = context.ActionArguments.SingleOrDefault(x => x.Value.ToString().Contains("Dto")).Value;
-
+            var param = context.ActionArguments.SingleOrDefault().Value;
             if (param == null)
             {
                 context.Result = new BadRequestObjectResult($"Object is null. Controller: {controller}, action: {action}");

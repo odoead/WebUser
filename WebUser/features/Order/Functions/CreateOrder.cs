@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
-using WebUser.Domain.entities;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
+using WebUser.features.Cart.Exceptions;
 using WebUser.features.Order.DTO;
-using WebUser.shared;
 using WebUser.shared.RepoWrapper;
 using E = WebUser.Domain.entities;
 
@@ -13,73 +14,82 @@ namespace WebUser.features.Order.Functions
         //input
         public class CreateOrderCommand : IRequest<OrderDTO>
         {
-            public User User { get; set; }
+            public E.User User { get; set; }
+            public string Codes { get; set; }
+            public int Points { get; set; }
             public string DeliveryAddress { get; set; }
             public int DeliveryMethod { get; set; }
             public int PaymentMethod { get; set; }
-            public bool Status { get; set; }
-            public DateTime CreatedAt { get; set; }
             public int CartId { get; set; }
-
         }
+
         //handler
         public class Handler : IRequestHandler<CreateOrderCommand, OrderDTO>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly IMapper mapper;
+            private readonly DB_Context dbcontext;
+            private readonly IServiceWrapper service;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper, IServiceWrapper wrapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
+                service = wrapper;
             }
 
             public async Task<OrderDTO> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
             {
-
-
+                //discount->coupon->promo->points
+                double totalCost = 0;
+                List<(E.CartItem, double)> itemDiscounts = new List<(E.CartItem, double)>();
+                E.Point addPoint;
+                List<E.Point> activatedPoints = new List<E.Point>();
+                var cart =
+                    await dbcontext.Carts.FirstOrDefaultAsync(q => q.ID == request.CartId, cancellationToken: cancellationToken)
+                    ?? throw new CartNotFoundException(request.CartId);
+                //disc
+                itemDiscounts.AddRange(service.Order.ApplyDiscount(cart));
+                //coupon
+                itemDiscounts.AddRange(service.Order.ApplyCoupons(cart, request.Codes));
+                //promo
+                var promoDisc = new List<(E.CartItem, double)>();
+                (promoDisc, addPoint) = service.Order.ApplyPromos(cart);
+                itemDiscounts.AddRange(promoDisc);
+                //point
+                activatedPoints.AddRange(service.Order.ApplyPoints(request.User, request.Points));
+                var orderProducts = service.OrderProduct.CreateOrderProdsFromCartItemsDiscounts(itemDiscounts);
+                foreach (var item in orderProducts)
+                {
+                    if (item.Product.Stock <= item.Amount)
+                    {
+                        throw new Exception($"not enought stock items ");
+                    }
+                    item.Product.ReservedStock += item.Amount;
+                    totalCost += item.FinalPrice * item.Amount;
+                }
+                if (activatedPoints.Any())
+                {
+                    totalCost -= request.Points;
+                }
                 var order = new E.Order
                 {
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     DeliveryAddress = request.DeliveryAddress,
                     DeliveryMethod = request.DeliveryMethod,
                     PaymentMethod = request.PaymentMethod,
-                    Status = request.Status,
+                    Status = false,
                     User = request.User,
-
+                    OrderProduct = orderProducts,
+                    Points = activatedPoints,
+                    PointsUsed = request.Points,
+                    Payment = totalCost,
                 };
-                var Cart = await _repoWrapper.Cart.GetByUserIdAsync(new ObjectID<E.User>(request.User.Id));
-                foreach (var item in Cart.items)
-                {
-                    var product = await _repoWrapper.Product.GetByIdAsync(new ObjectID<E.Product>(item.ProductId));
-                    var amount = item.Amount >= item.Product.Stock ? item.Product.Stock : item.Amount;
-                    product.Stock = product.Stock - amount;
-
-                    order.OrderProduct.Add(
-                        new E.OrderProduct
-                        {
-                            Amount = amount,
-                            Product = item.Product,
-
-                        });
-                    Cart.items.Remove(item);
-                }
-
-
-                _repoWrapper.OrderProduct.CreateOrderProdFromCartItems(new ObjectID<E.Cart>(request.CartId), order);
-
-                _repoWrapper.Order.Create(order);
-                await _repoWrapper.SaveAsync();
-
-                var CartItems = await _repoWrapper.CartItem.GetByCartIdAsync(new ObjectID<E.Cart>(request.CartId));
-                _repoWrapper.OrderProduct.CreateOrderProdFromCartItems(new ObjectID<E.Cart>(request.CartId), order);
-
-                /*order= await _repoWrapper.Order.GetByUserIdAsync(new shared.ObjectID<User>(request.User.Id));
-                if()
-                var results = _mapper.Map<OrderDTO>(order);
-                return results;*/
+                request.User.Points.Add(addPoint);
+                await dbcontext.Orders.AddAsync(order, cancellationToken);
+                await dbcontext.SaveChangesAsync(cancellationToken);
+                var results = mapper.Map<OrderDTO>(order);
+                return results;
             }
         }
-
     }
 }

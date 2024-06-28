@@ -1,45 +1,43 @@
-﻿using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Cart.Exceptions;
 using WebUser.features.Product.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
-using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart.functions
 {
     public class RemoveProductFromCart
     {
-        public class AddProductToCartCommand : IRequest
+        public class RemoveProductFromCartCommand : IRequest
         {
             public int ProductId { get; set; }
             public int CartId { get; set; }
-            public int Amount { get; set; }
         }
-        public class Handler : IRequestHandler<AddProductToCartCommand>
+
+        public class Handler : IRequestHandler<RemoveProductFromCartCommand>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper repoWrapper, IMapper mapper)
+            public Handler(DB_Context context)
             {
-                _repoWrapper = repoWrapper;
-                _mapper = mapper;
+                dbcontext = context;
             }
-            public async Task Handle(AddProductToCartCommand request, CancellationToken cancellationToken)
+
+            public async Task Handle(RemoveProductFromCartCommand request, CancellationToken cancellationToken)
             {
-
-                if (!(await _repoWrapper.Product.IsExistsAsync(new ObjectID<E.Product>(request.ProductId))))
-                    throw new ProductNotFoundException(request.ProductId);
-                if (!(await _repoWrapper.Cart.IsExistsAsync(new ObjectID<E.Cart>(request.CartId))))
+                if (!await dbcontext.Carts.AnyAsync(q => q.ID == request.CartId, cancellationToken: cancellationToken))
                     throw new CartNotFoundException(request.CartId);
-                var Cart = await _repoWrapper.Cart.GetByIdAsync(new ObjectID<E.Cart>(request.CartId));
-                var products = await _repoWrapper.Product.GetByIdAsync(new ObjectID<E.Product>(request.ProductId));
-                _repoWrapper.Cart.RemoveProduct(products, Cart);
-
-                //_mapper.Map(AttributeName, await _repoWrapper.AttributeName.GetByIdAsync(new ObjectID<E.AttributeName>(request.AttributeNameID)));
-                await _repoWrapper.SaveAsync();
-
+                if (!await dbcontext.Products.AnyAsync(q => q.ID == request.ProductId, cancellationToken: cancellationToken))
+                    throw new ProductNotFoundException(request.ProductId);
+                var cartItem = await dbcontext.CartItems.FirstOrDefaultAsync(
+                    q => q.CartID == request.CartId && q.ProductID == request.ProductId,
+                    cancellationToken: cancellationToken
+                );
+                if (cartItem != null)
+                {
+                    dbcontext.CartItems.Remove(cartItem);
+                    await dbcontext.SaveChangesAsync(cancellationToken);
+                }
             }
         }
     }

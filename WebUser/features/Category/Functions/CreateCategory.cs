@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
-using E = WebUser.Domain.entities;
-using WebUser.shared.RepoWrapper;
-using WebUser.features.AttributeValue.DTO;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Category.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Category.Functions
 {
@@ -12,41 +12,56 @@ namespace WebUser.features.Category.Functions
         //input
         public class CreateCategoryCommand : IRequest<CategoryDTO>
         {
-            public int Id { get; set; }
             public string Name { get; set; }
-            public ICollection<E.AttributeName> Attributes { get; set; }
-            public ICollection<E.Category> Subcategories { get; set; }
-            public E.Category ParentCategory { get; set; }
+            public List<int>? SubcategoriesID { get; set; }
+            public int ParentCategoryID { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<CreateCategoryCommand, CategoryDTO>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly IMapper mapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
             public async Task<CategoryDTO> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
             {
+                List<E.Category> subcategories = new List<E.Category>();
+                if (request.SubcategoriesID != null)
+                {
+                    subcategories = await dbcontext
+                        .Categories.Where(q => request.SubcategoriesID.Contains(q.ID))
+                        .ToListAsync(cancellationToken: cancellationToken);
+                }
+                var parent = await dbcontext
+                    .Categories.Where(q => q.ID == request.ParentCategoryID)
+                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 var category = new E.Category
                 {
                     Name = request.Name,
-                    Attributes = request.Attributes,
-                    Subcategories = request.Subcategories,
-                    ParentCategory = request.ParentCategory,
-                    ID=request.Id,
-                    ParentCategoryId=request.ParentCategory.ID,
+                    Subcategories = subcategories,
+                    ParentCategory = parent,
                 };
-                _repoWrapper.Category.Create(category);
-                await _repoWrapper.SaveAsync();
-                var results = _mapper.Map<CategoryDTO>(category);
+                if (
+                    !await dbcontext.Categories.AnyAsync(
+                        q => q.Name == category.Name && q.Subcategories == category.Subcategories && q.ParentCategory == category.ParentCategory,
+                        cancellationToken: cancellationToken
+                    )
+                )
+                {
+                    await dbcontext.Categories.AddAsync(category, cancellationToken);
+                    //parent.Subcategories.Add(category);
+                    //subcategories.Select(q => q.ParentCategory);
+                    await dbcontext.SaveChangesAsync(cancellationToken);
+                }
+                var results = mapper.Map<CategoryDTO>(category);
                 return results;
             }
         }
-
     }
 }

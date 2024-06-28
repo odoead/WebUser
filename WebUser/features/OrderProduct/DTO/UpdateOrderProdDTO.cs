@@ -1,4 +1,4 @@
-﻿using E=WebUser.Domain.entities;
+﻿using E = WebUser.Domain.entities;
 
 namespace WebUser.features.OrderProduct.DTO
 {

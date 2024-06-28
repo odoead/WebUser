@@ -1,16 +1,18 @@
-﻿using Interfaces.IRepository;
+﻿using Entities;
 using Entities.data;
-using Entities;
+using Interfaces.IRepository;
 
 namespace WebUser.Repository
 {
     public class UserRepository : IUserRepo
     {
         private AppDbContext DBContext;
+
         public UserRepository(AppDbContext db)
         {
             DBContext = db;
         }
+
         public Task<bool> CreateAsync(UserDTO entity)
         {
             throw new NotImplementedException();

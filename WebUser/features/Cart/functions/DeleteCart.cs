@@ -1,43 +1,36 @@
-﻿using MediatR;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Cart.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
-using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart.functions
 {
     public class DeleteCart
     {
         //input
-        public class DeleteAttributeNameCommand : IRequest
+        public class DeleteCartCommand : IRequest
         {
             public int ID { get; set; }
-
         }
+
         //handler
-        public class Handler : IRequestHandler<DeleteAttributeNameCommand>
+        public class Handler : IRequestHandler<DeleteCartCommand>
         {
-            private IRepoWrapper _repoWrapper;
+            private readonly DB_Context _dbcontext;
 
-            public Handler(IRepoWrapper repoWrapper)
+            public Handler(DB_Context dbcontex)
             {
-                _repoWrapper = repoWrapper;
+                _dbcontext = dbcontex;
             }
 
-            public async Task Handle(DeleteAttributeNameCommand request, CancellationToken cancellationToken)
+            public async Task Handle(DeleteCartCommand request, CancellationToken cancellationToken)
             {
-
-                if (await _repoWrapper.Cart.IsExistsAsync(new ObjectID<E.Cart>(request.ID)))
-                {
-                    var name = await _repoWrapper.Cart.GetByIdAsync(new ObjectID<E.Cart>(request.ID));
-                    _repoWrapper.Cart.Delete(name);
-                    await _repoWrapper.SaveAsync();
-
-                }
-                else
-                    throw new CartNotFoundException(request.ID);
+                var cart =
+                    await _dbcontext.Carts.Where(q => q.ID == request.ID).FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                    ?? throw new CartNotFoundException(request.ID);
+                _dbcontext.Carts.Remove(cart);
+                await _dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
-
     }
 }

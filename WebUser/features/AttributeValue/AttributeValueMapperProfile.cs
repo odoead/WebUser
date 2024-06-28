@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using E=WebUser.Domain.entities;
+using AutoMapper;
 using WebUser.features.AttributeValue.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.AttributeValue
 {
@@ -8,7 +8,11 @@ namespace WebUser.features.AttributeValue
     {
         public AttributeValueMapperProfile()
         {
-            CreateMap<E.AttributeValue,AttributeValueDTO>().ReverseMap();
+            CreateMap<E.AttributeValue, AttributeValueDTO>().ReverseMap();
+            CreateMap<List<E.AttributeValue>, AttributeNameValueDTO>()
+                .ForMember(dest => dest.Attributes, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.AttributeName, opt => opt.MapFrom(src => src.FirstOrDefault().AttributeName))
+                .ReverseMap();
             CreateMap<E.AttributeValue, AttributeValueUpdateDTO>().ReverseMap();
         }
     }

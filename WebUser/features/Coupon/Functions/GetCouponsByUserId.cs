@@ -1,10 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
-using E=WebUser.Domain.entities;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
+using WebUser.features.Category.Exceptions;
 using WebUser.features.Coupon.DTO;
-using WebUser.features.Coupon.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
+using WebUser.features.Order.Exceptions;
 
 namespace WebUser.features.Coupon.Functions
 {
@@ -13,37 +13,31 @@ namespace WebUser.features.Coupon.Functions
         //input
         public class GetCouponByUserIDQuery : IRequest<ICollection<CouponDTO>>
         {
-            public int UserId { get; set; }
+            public string UserId { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<GetCouponByUserIDQuery, ICollection<CouponDTO>>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly IMapper mapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
             public async Task<ICollection<CouponDTO>> Handle(GetCouponByUserIDQuery request, CancellationToken cancellationToken)
             {
-                if (await _repoWrapper.user.IsExistsAsync(new ObjectID<E.User>(request.UserId)))
-                {
-                    try
-                    {
-                        var Coupons = await _repoWrapper.Coupon.GetByOrderIdAsync(new ObjectID<E.User>(request.UserId));
-                        var results = _mapper.Map<ICollection<CouponDTO>>(Coupons);
-                        return results;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new CouponNotFoundException(-1);
-                    }
-
-                }
-                throw new Usernotfoundexception
+                if (await dbcontext.Orders.AnyAsync(q => q.UserID == request.UserId, cancellationToken: cancellationToken))
+                    throw new OrderNotFoundException(-1);
+                // throw new userNotFoundException(request.UserId);
+                var coupons =
+                    await dbcontext.Coupons.Where(q => q.Order.UserID == request.UserId).ToListAsync(cancellationToken: cancellationToken)
+                    ?? throw new CategoryNotFoundException(-1);
+                var results = mapper.Map<ICollection<CouponDTO>>(coupons);
+                return results;
             }
         }
     }

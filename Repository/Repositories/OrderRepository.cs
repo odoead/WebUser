@@ -7,10 +7,12 @@ namespace WebUser.Repository
     public class OrderRepository : IOrderRepo
     {
         private AppDbContext DBContext;
+
         public OrderRepository(AppDbContext db)
         {
             DBContext = db;
         }
+
         public Task<bool> CreateAsync(Order entity)
         {
             throw new NotImplementedException();

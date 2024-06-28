@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Cart.DTO;
-using WebUser.shared.RepoWrapper;
+using WebUser.features.User.Exceptions;
 using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart.functions
@@ -11,35 +13,35 @@ namespace WebUser.features.Cart.functions
         //input
         public class CreateCartCommand : IRequest<CartDTO>
         {
-            public E.User User { get; set; }
+            public string UserId { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<CreateCartCommand, CartDTO>
         {
-            private IRepoWrapper _RepoWrapper;
-            private IMapper _mapper;
+            private readonly IMapper mapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper RepoWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _RepoWrapper = RepoWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
             public async Task<CartDTO> Handle(CreateCartCommand request, CancellationToken cancellationToken)
             {
-                var cart = new E.Cart
+                var user =
+                    await dbcontext.Users.FirstOrDefaultAsync(q => q.Id == request.UserId, cancellationToken: cancellationToken)
+                    ?? throw new UserNotFoundException(request.UserId);
+                var cart = new E.Cart { User = user, Items = null };
+                if (!await dbcontext.Carts.AnyAsync(q => q.User == user, cancellationToken: cancellationToken))
                 {
-                    User = request.User,
-                    items = null,
-                    UserId = request.User.Id
-
-                };
-                _RepoWrapper.Cart.Create(cart);
-                await _RepoWrapper.SaveAsync();
-                var results = _mapper.Map<CartDTO>(cart);
+                    await dbcontext.Carts.AddAsync(cart, cancellationToken);
+                    await dbcontext.SaveChangesAsync(cancellationToken);
+                }
+                var results = mapper.Map<CartDTO>(cart);
                 return results;
             }
         }
-
     }
 }

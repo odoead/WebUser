@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Interfaces.IRepository
 {
-    public interface IReposBase<T> where T : class
+    public interface IReposBase<T>
+        where T : class
     {
         Task<ICollection<T>> GetAllAsync();
         Task<T> FindByIdAsync(int id);

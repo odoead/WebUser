@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Coupon.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
-using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Coupon.Functions
 {
@@ -12,32 +12,26 @@ namespace WebUser.features.Coupon.Functions
         public class DeleteCouponCommand : IRequest
         {
             public int ID { get; set; }
-
         }
+
         //handler
         public class Handler : IRequestHandler<DeleteCouponCommand>
         {
-            private IRepoWrapper _repoWrapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper ServiceWrapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
+                dbcontext = context;
             }
 
             public async Task Handle(DeleteCouponCommand request, CancellationToken cancellationToken)
             {
-
-                if (await _repoWrapper.Coupon.IsExistsAsync(new ObjectID<E.Coupon>(request.ID)))
-                {
-                    var Coupon = await _repoWrapper.Coupon.GetByIdAsync(new ObjectID<E.Coupon>(request.ID));
-                    _repoWrapper.Coupon.Delete(Coupon);
-                    await _repoWrapper.SaveAsync();
-
-                }
-                else
-                    throw new CouponNotFoundException(request.ID);
+                var coupon =
+                    await dbcontext.Coupons.Where(q => q.ID == request.ID).FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                    ?? throw new CouponNotFoundException(request.ID);
+                dbcontext.Coupons.Remove(coupon);
+                await dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
-
     }
 }

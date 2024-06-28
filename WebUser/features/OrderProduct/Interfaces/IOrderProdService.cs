@@ -1,17 +1,21 @@
-﻿using WebUser.shared;
 using E = WebUser.Domain.entities;
+
 namespace WebUser.features.OrderProduct.Interfaces
 {
     public interface IOrderProductService
     {
-        public void Delete(E.OrderProduct OrderProduct);
-        public Task<ICollection<E.OrderProduct>>? GetAllAsync();
-        public Task<E.OrderProduct>? GetByIdAsync(ObjectID<E.OrderProduct> Id);
+        /// <summary>
+        /// Moves products from cart to order
+        /// </summary>
+        /// <param name="CartId"></param>
+        /// <returns></returns>
+        public Task<ICollection<E.OrderProduct>> CreateOrderProdsFromCartItems(int CartId);
 
-        public Task<ICollection<E.OrderProduct>>? GetByUserIdAsync(ObjectID<E.User> Id);
-        public Task<bool> IsExistsAsync(ObjectID<E.OrderProduct> Id);
-
-        public void Update(E.OrderProduct OrderProduct);
-
+        /// <summary>
+        /// Moves products from cart to order and calculates discount
+        /// </summary>
+        /// <param name="cartItemDiscounts"></param>
+        /// <returns></returns>
+        public ICollection<E.OrderProduct> CreateOrderProdsFromCartItemsDiscounts(List<(E.CartItem items, double discount)> cartItemDiscounts);
     }
 }

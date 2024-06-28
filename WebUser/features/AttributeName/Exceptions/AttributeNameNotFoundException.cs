@@ -2,11 +2,9 @@
 
 namespace WebUser.features.AttributeName.Exceptions
 {
-    public class AttributeNameNotFoundException: NotFoundException
+    public class AttributeNameNotFoundException : NotFoundException
     {
-        public AttributeNameNotFoundException(int id): base($"AttributeName with ID {id} doesnt exists")
-        {
-            
-        }
+        public AttributeNameNotFoundException(int id)
+            : base($"AttributeName with ID {id} doesnt exists") { }
     }
 }

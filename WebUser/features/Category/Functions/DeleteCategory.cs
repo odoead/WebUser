@@ -1,11 +1,7 @@
-﻿using AutoMapper;
 using MediatR;
-using E = WebUser.Domain.entities;
-using WebUser.features.Category.DTO;
-using WebUser.Domain.entities;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Category.Exceptions;
-using WebUser.shared.RepoWrapper;
-using WebUser.shared;
 
 namespace WebUser.features.Category.Functions
 {
@@ -15,32 +11,26 @@ namespace WebUser.features.Category.Functions
         public class DeleteCategoryCommand : IRequest
         {
             public int ID { get; set; }
-
         }
+
         //handler
         public class Handler : IRequestHandler<DeleteCategoryCommand>
         {
-            private IRepoWrapper _repoWrapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper ServiceWrapper)
+            public Handler(DB_Context dbcontex)
             {
-                _repoWrapper = ServiceWrapper;
+                dbcontext = dbcontex;
             }
 
             public async Task Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
-
-                if (await _repoWrapper.Category.IsExistsAsync(new ObjectID<E.Category>(request.ID)))
-                {
-                    var category = await _repoWrapper.Category.GetByIdAsync(new ObjectID<E.Category>(request.ID));
-                    _repoWrapper.Category.Delete(category);
-                    await _repoWrapper.SaveAsync();
-
-                }
-                else
-                    throw new CategoryNotFoundException(request.ID);
+                var category =
+                    await dbcontext.Categories.Where(q => q.ID == request.ID).FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                    ?? throw new CategoryNotFoundException(request.ID);
+                dbcontext.Categories.Remove(category);
+                await dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
-
     }
 }

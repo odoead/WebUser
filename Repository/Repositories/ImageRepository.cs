@@ -7,10 +7,12 @@ namespace WebUser.Repository
     public class ImageRepository : IImageRepo
     {
         private AppDbContext DBContext;
+
         public ImageRepository(AppDbContext db)
         {
             DBContext = db;
         }
+
         public Task<bool> CreateAsync(Image entity)
         {
             throw new NotImplementedException();

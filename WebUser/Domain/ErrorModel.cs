@@ -1,16 +1,12 @@
-﻿using AutoMapper.Internal.Mappers;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace WebUser.Domain
 {
-
     public class ErrorModel
     {
-        public int StatusCode {  get; set; }
+        public int StatusCode { get; set; }
         public string Message { get; set; }
-        public override string ToString()
-        { 
-           return JsonSerializer.Serialize(this);
-        }
+
+        public override string ToString() => JsonSerializer.Serialize(this);
     }
 }

@@ -1,22 +1,39 @@
-﻿using WebUser.shared;
 using E = WebUser.Domain.entities;
+
 namespace WebUser.features.Order.Interfaces
 {
     public interface IOrderService
     {
-        public void Create(E.Order order);
-        public void AddCoupon(E.Order order, E.Coupon coupon);
+        /// <summary>
+        /// Applies Discount for cart
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns> list of items with their calculated discount values </returns>
+        public List<(E.CartItem, double)> ApplyDiscount(E.Cart cart);
 
-        public void AddPoints(E.Order order, int pointsValue);
+        /// <summary>
+        /// Applies coupons for cart
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <param name="couponsCodes"></param>
+        /// <returns>items with their calculated discount values</returns>
+        public List<(E.CartItem, double)> ApplyCoupons(E.Cart cart, string couponsCodes);
 
-        public bool IsProcessed(ObjectID<E.Order> Id);
+        /// <summary>
+        /// Determines necessary points amount for order
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="pointsValue"></param>
+        /// <returns>list of used points</returns>
+        /// <exception cref="Exception"></exception>
+        public ICollection<E.Point> ApplyPoints(E.User user, int pointsValue);
 
-        public void Delete(E.Order Order);
-        public Task<ICollection<E.Order>> GetAllAsync();
-        public Task<E.Order> GetByIdAsync(ObjectID<E.Order> Id);
-        public Task<bool> IsExistsAsync(ObjectID<E.Order> Id);
-        public  Task<ICollection<E.Order>>? GetByUserIdAsync(ObjectID<E.User> UserId);
-
-
+        /// <summary>
+        ///Applies all active promotions to cart
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns>items with their calculated discount values and new point for user </returns>
+        public (List<(E.CartItem, double)>, E.Point) ApplyPromos(E.Cart cart);
+        public bool IsProcessed(int Id);
     }
 }

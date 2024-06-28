@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebUser</name>
+    </assembly>
+    <members>
+        <member name="M:WebUser.features.Cart.functions.CartController.RemoveProduct(System.Int32,System.Int32)">
+             <summary>
+            
+             </summary>
+             <param name="id">test</param>
+             <param name="productid"></param>
+             <returns></returns>
+        </member>
+        <member name="M:WebUser.features.OrderProduct.Interfaces.IOrderProductService.CreateOrderProdsFromCartItems(System.Int32)">
+            <summary>
+            Moves products from cart to order
+            </summary>
+            <param name="CartId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebUser.features.OrderProduct.Interfaces.IOrderProductService.CreateOrderProdsFromCartItemsDiscounts(System.Collections.Generic.List{System.ValueTuple{WebUser.Domain.entities.CartItem,System.Double}})">
+            <summary>
+            Moves products from cart to order and calculates discount
+            </summary>
+            <param name="cartItemDiscounts"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebUser.features.Order.Interfaces.IOrderService.ApplyDiscount(WebUser.Domain.entities.Cart)">
+            <summary>
+            Applies Discount for cart
+            </summary>
+            <param name="cart"></param>
+            <returns> list of items with their calculated discount values </returns>
+        </member>
+        <member name="M:WebUser.features.Order.Interfaces.IOrderService.ApplyCoupons(WebUser.Domain.entities.Cart,System.String)">
+            <summary>
+            Applies coupons for cart
+            </summary>
+            <param name="cart"></param>
+            <param name="couponsCodes"></param>
+            <returns>items with their calculated discount values</returns>
+        </member>
+        <member name="M:WebUser.features.Order.Interfaces.IOrderService.ApplyPoints(WebUser.Domain.entities.User,System.Int32)">
+            <summary>
+            Determines necessary points amount for order
+            </summary>
+            <param name="user"></param>
+            <param name="pointsValue"></param>
+            <returns>list of used points</returns>
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:WebUser.features.Order.Interfaces.IOrderService.ApplyPromos(WebUser.Domain.entities.Cart)">
+             <summary>
+            Applies all active promotions to cart
+             </summary>
+             <param name="cart"></param>
+             <returns>items with their calculated discount values and new point for user </returns>
+        </member>
+        <member name="M:WebUser.features.User.UserController.Register(WebUser.features.User.Functions.CreateUser.CreateUserCommand)">
+            <summary>
+            еуеееееееееее
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

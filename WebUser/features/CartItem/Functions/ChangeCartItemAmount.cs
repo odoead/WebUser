@@ -1,7 +1,8 @@
-﻿using MediatR;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
-using E = WebUser.Domain.entities;
+using AutoMapper;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
+using WebUser.features.CartItem.Exceptions;
 
 namespace WebUser.features.CartItem.Functions
 {
@@ -13,28 +14,31 @@ namespace WebUser.features.CartItem.Functions
             public int CartItemId { get; set; }
             public int NewAmount { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<ChangeCartItemAmountCommand>
         {
-            private IRepoWrapper _repoWrapper;
+            private readonly DB_Context dbcontext;
+            private readonly IMapper mapper;
 
-            public Handler(IRepoWrapper repoWrapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = repoWrapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
             public async Task Handle(ChangeCartItemAmountCommand request, CancellationToken cancellationToken)
             {
-                E.CartItem cartItem = await _repoWrapper.CartItem.GetByIdAsync(new ObjectID<E.CartItem>(request.CartItemId));
-                var product = await _repoWrapper.Product.GetByIdAsync(new ObjectID<E.Product>(cartItem.ProductId));
-                if (product.Stock <= request.NewAmount)
+                var cartItem =
+                    await dbcontext.CartItems.FirstOrDefaultAsync(ci => ci.ID == request.CartItemId, cancellationToken)
+                    ?? throw new CartItemNotFoundException(request.CartItemId);
+                if (cartItem.Product.Stock <= request.NewAmount)
                 {
-                    cartItem.Amount = product.Stock;
+                    cartItem.Amount = cartItem.Product.Stock;
                 }
                 else
                     cartItem.Amount = request.NewAmount;
-                await _repoWrapper.SaveAsync();
-
+                await dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
     }

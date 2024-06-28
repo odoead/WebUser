@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Cart.Exceptions;
+using WebUser.features.CartItem.DTO;
 using WebUser.features.Product.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
 using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart.functions
@@ -16,30 +17,41 @@ namespace WebUser.features.Cart.functions
             public int CartId { get; set; }
             public int Amount { get; set; }
         }
+
         public class Handler : IRequestHandler<AddProductToCartCommand>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly DB_Context dbcontext;
+            private readonly IMapper mapper;
 
-            public Handler(IRepoWrapper repoWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = repoWrapper;
-                _mapper = mapper;
+                dbcontext = context;
             }
+
             public async Task Handle(AddProductToCartCommand request, CancellationToken cancellationToken)
             {
-
-                if (!await _repoWrapper.Product.IsExistsAsync(new ObjectID<E.Product>(request.ProductId)))
-                    throw new ProductNotFoundException(request.ProductId);
-                if (!await _repoWrapper.Cart.IsExistsAsync(new ObjectID<E.Cart>(request.CartId)))
-                    throw new CartNotFoundException(request.CartId);
-                var Cart = await _repoWrapper.Cart.GetByIdAsync(new ObjectID<E.Cart>(request.CartId));
-                var products = await _repoWrapper.Product.GetByIdAsync(new ObjectID<E.Product>(request.ProductId));
-                _repoWrapper.Cart.AddProduct(products, request.Amount, Cart);
-
-                //_mapper.Map(AttributeName, await _repoWrapper.AttributeName.GetByIdAsync(new ObjectID<E.AttributeName>(request.AttributeNameID)));
-                await _repoWrapper.SaveAsync();
-
+                var cart =
+                    await dbcontext.Carts.Where(q => q.ID == request.CartId).FirstOrDefaultAsync(cancellationToken)
+                    ?? throw new CartNotFoundException(request.CartId);
+                var product =
+                    await dbcontext.Products.Where(q => q.ID == request.CartId).FirstOrDefaultAsync(cancellationToken)
+                    ?? throw new ProductNotFoundException(request.ProductId);
+                var cartItem = cart.Items.FirstOrDefault(q => q.Product.ID == request.ProductId);
+                if (cartItem == null)
+                {
+                    var newCartItem = new E.CartItem
+                    {
+                        Amount = request.Amount,
+                        Cart = cart,
+                        Product = product
+                    };
+                    cart.Items.Add(cartItem);
+                }
+                else
+                {
+                    cartItem.Amount = request.Amount;
+                }
+                await dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
     }

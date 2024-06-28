@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using E=WebUser.Domain.entities;
-using WebUser.features.discount.DTO;
+using AutoMapper;
 using WebUser.features.Image.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Image
 {
@@ -9,7 +8,7 @@ namespace WebUser.features.Image
     {
         public ImageMapperProfile()
         {
-            CreateMap<E.Image,ImageDTO>().ReverseMap();
+            CreateMap<E.Image, ImageDTO>().ReverseMap();
         }
     }
 }

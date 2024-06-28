@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Employees</name>
+    </assembly>
+    <members>
+        <member name="M:Employees.Controllers.EmployeesController.Add(Employees.Models.People)">
+             <summary>
+             Создание
+             </summary>
+             <param name="employee"></param>
+             <remarks>
+             Пример запроса:
+            
+                 POST /employee
+                 {
+                    "ManagerId": 1,
+                    "Name": "John",
+                    "Surname": "Doe",
+                    "Patronymic": "Patrick",
+                    "Birthday": "1990-01-01",
+                    "Education": "Masters",
+                    "Position": "Developer",
+                    "Salary": 50000,
+                    "DepartmentId": 2
+                 }
+             </remarks>
+             <param name="employee">Empl00e</param>
+             <returns></returns>
+        </member>
+    </members>
+</doc>

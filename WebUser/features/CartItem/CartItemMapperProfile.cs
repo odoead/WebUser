@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using WebUser.features.Cart.DTO;
-using E=WebUser.Domain.entities;
+using AutoMapper;
+using WebUser.features.CartItem.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart
 {
@@ -8,8 +8,7 @@ namespace WebUser.features.Cart
     {
         public CartItemMapperProfile()
         {
-            CreateMap<E.CartItem,CartDTO>().ReverseMap();
-            CreateMap<E.CartItem,CartUpdateDTO>().ReverseMap();
+            CreateMap<E.CartItem, CartItemDTO>().ForMember(dest => dest.ProductMin, opt => opt.MapFrom(src => src.Product)).ReverseMap();
         }
     }
 }

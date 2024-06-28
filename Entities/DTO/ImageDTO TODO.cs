@@ -1,5 +1,5 @@
 ﻿using System;
-                        using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace Data.DBData
     public class ImageDTO
     {
         public int ID { get; set; }
-        
+
         public byte[] ImageContent { get; set; }
     }
 }

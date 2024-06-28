@@ -1,48 +1,39 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
-using WebUser.features.AttributeValue.DTO;
-using WebUser.features.Category.Exceptions;
-using WebUser.shared.RepoWrapper;
-using WebUser.shared;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Order.DTO;
-using E=WebUser.Domain.entities;
-using WebUser.features.Order.Exceptions;
+using WebUser.features.User.Exceptions;
 
 namespace WebUser.features.Order.Functions
 {
     public class GetOrdersByUser
     {
-
         //input
         public class GetOrdersByUserQuery : IRequest<ICollection<OrderDTO>>
         {
-            public int UserId { get; set; }
+            public string UserId { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<GetOrdersByUserQuery, ICollection<OrderDTO>>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly DB_Context dbcontext;
+            private readonly IMapper mapper;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
-            public async Task<ICollection<OrderDTO>> Handle(GetOrdersByUserQuery query, CancellationToken cancellationToken)
+            public async Task<ICollection<OrderDTO>> Handle(GetOrdersByUserQuery request, CancellationToken cancellationToken)
             {
-                if (await _repoWrapper.user.IsExistsAsync(new ObjectID<E.Order>(query.UserId)))
-                {
-                    var order = await _repoWrapper.Order.GetByUserIdAsync(new ObjectID<E.User>(query.UserId));
-                    if(order== null)
-                    {
-                        throw new OrderNotFoundException(-1);
-                    }
-                    var results = _mapper.Map<ICollection<OrderDTO>>(order);
-                    return results;
-                }
-                throw new CategoryNotFoundException(-1);
+                var user =
+                    await dbcontext.Users.FirstOrDefaultAsync(q => q.Id == request.UserId, cancellationToken: cancellationToken)
+                    ?? throw new UserNotFoundException(request.UserId);
+                var orders = await dbcontext.Orders.Where(q => q.User.Id == user.Id).ToListAsync(cancellationToken: cancellationToken);
+                return mapper.Map<ICollection<OrderDTO>>(orders);
             }
         }
     }

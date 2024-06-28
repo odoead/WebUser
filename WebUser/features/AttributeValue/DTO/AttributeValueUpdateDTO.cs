@@ -1,10 +1,10 @@
-﻿using E=WebUser.Domain.entities;
+using WebUser.features.AttributeName.DTO;
 
 namespace WebUser.features.AttributeValue.DTO
 {
     public class AttributeValueUpdateDTO
     {
         public string Value { get; set; }
-        public E.AttributeName? AttributeName { get; set; }
+        public AttributeNameDTO AttributeName { get; set; }
     }
 }

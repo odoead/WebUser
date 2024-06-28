@@ -1,45 +1,36 @@
-﻿using AutoMapper;
 using MediatR;
-using Enteties = WebUser.Domain.entities;
-using WebUser.features.Point.DTO;
-using WebUser.Domain.entities;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Point.Exceptions;
-using WebUser.shared.RepoWrapper;
 
 namespace WebUser.features.Point.Functions
 {
-    public class DeletePromotion
+    public class DeletePoint
     {
         //input
-        public class DeleteCommand : IRequest
+        public class DeletePointCommand : IRequest
         {
             public int ID { get; set; }
-
         }
+
         //handler
-        public class Handler : IRequestHandler<DeleteCommand>
+        public class Handler : IRequestHandler<DeletePointCommand>
         {
-            private IRepoWrapper _repoWrapper;
+            private readonly DB_Context dbcontext;
 
-            public Handler(IRepoWrapper ServiceWrapper)
+            public Handler(DB_Context context)
             {
-                _repoWrapper = ServiceWrapper;
+                dbcontext = context;
             }
 
-            public async Task Handle(DeleteCommand request, CancellationToken cancellationToken)
+            public async Task Handle(DeletePointCommand request, CancellationToken cancellationToken)
             {
-
-                if (await _repoWrapper.Point.IsExistsAsync(request.ID))
-                {
-                    var Point = await _repoWrapper.Point.GetByIdAsync(request.ID);
-                    _repoWrapper.Point.Delete(Point);
-                    await _repoWrapper.SaveAsync();
-
-                }
-                else
-                    throw new PointNotFoundException(request.ID);
+                var item =
+                    await dbcontext.Points.Where(q => q.ID == request.ID).FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                    ?? throw new PointNotFoundException(request.ID);
+                dbcontext.Points.Remove(item);
+                await dbcontext.SaveChangesAsync(cancellationToken);
             }
         }
-
     }
 }

@@ -1,6 +1,4 @@
-﻿using WebUser.Domain.entities;
-
-namespace WebUser.shared.RequestForming.features
+﻿namespace WebUser.shared.RequestForming.features
 {
     public abstract class RequestParameters
     {

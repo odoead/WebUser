@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using E=WebUser.Domain.entities;
+using AutoMapper;
 using WebUser.features.OrderProduct.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.OrderProduct
 {
@@ -8,9 +8,11 @@ namespace WebUser.features.OrderProduct
     {
         public OrderProductMapperProfile()
         {
-            CreateMap<E.OrderProduct,OrderProductDTO>().ReverseMap();
-            CreateMap<E.OrderProduct, OrderProductDTO>().ReverseMap();
-
+            CreateMap<E.OrderProduct, OrderProductDTO>()
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
+                .ForMember(dest => dest.TotalFinalPrice, opt => opt.MapFrom(src => src.Amount * src.FinalPrice))
+                .ReverseMap();
+            CreateMap<E.OrderProduct, UpdateOrderProdDTO>().ReverseMap();
         }
     }
 }

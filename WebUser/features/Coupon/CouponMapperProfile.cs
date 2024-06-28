@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using E=WebUser.Domain.entities;
+using AutoMapper;
 using WebUser.features.Coupon.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Coupon
 {
@@ -8,8 +8,20 @@ namespace WebUser.features.Coupon
     {
         public DiscountMapperProfile()
         {
-            CreateMap<E.Coupon,CouponDTO>().ReverseMap();
-            CreateMap<E.Coupon,UpdateCouponDTO>().ReverseMap();
+            CreateMap<E.Coupon, CouponDTO>()
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
+                .ForMember(
+                    dest => dest.IsActive,
+                    opt => opt.MapFrom(src => src.IsActivated && DateTime.UtcNow >= src.ActiveFrom && DateTime.UtcNow <= src.ActiveTo)
+                )
+                .ReverseMap();
+            CreateMap<E.Coupon, CouponMinDTO>()
+                .ForMember(
+                    dest => dest.IsActive,
+                    opt => opt.MapFrom(src => src.IsActivated && DateTime.UtcNow >= src.ActiveFrom && DateTime.UtcNow <= src.ActiveTo)
+                )
+                .ReverseMap();
+            CreateMap<E.Coupon, UpdateCouponDTO>().ReverseMap();
         }
     }
 }

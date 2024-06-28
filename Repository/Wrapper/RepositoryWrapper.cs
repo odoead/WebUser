@@ -13,11 +13,11 @@ namespace Repository.Wrapper
     /// </summary>
     public class RepositoryWrapper : IRepoWrapper
     {
-
         public RepositoryWrapper(AppDbContext context)
         {
             _context = context;
         }
+
         private AppDbContext _context;
         private IBrandRepo _BrandRepo;
         private IImageRepo _ImageRepo;
@@ -44,7 +44,6 @@ namespace Repository.Wrapper
                 if (_ImageRepo == null)
                 {
                     _ImageRepo = new ImageRepository(_context);
-
                     ;
                 }
                 return _ImageRepo;
@@ -58,13 +57,11 @@ namespace Repository.Wrapper
                 if (_OrderRepo == null)
                 {
                     _OrderRepo = new OrderRepository(_context);
-
                     ;
                 }
                 return _OrderRepo;
             }
         }
-
 
         public IProductRepo ProductRepo
         {
@@ -73,7 +70,6 @@ namespace Repository.Wrapper
                 if (_ProductRepo == null)
                 {
                     _ProductRepo = new ProductRepository(_context);
-
                     ;
                 }
                 return _ProductRepo;
@@ -87,7 +83,6 @@ namespace Repository.Wrapper
                 if (_UserRepo == null)
                 {
                     _UserRepo = new UserRepository(_context);
-
                     ;
                 }
                 return _UserRepo;
@@ -101,7 +96,6 @@ namespace Repository.Wrapper
                 if (_CategoryRepo == null)
                 {
                     _CategoryRepo = new CategoryRepository(_context);
-
                     ;
                 }
                 return _CategoryRepo;

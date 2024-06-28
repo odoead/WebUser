@@ -1,11 +1,12 @@
-﻿namespace WebUser.shared.RequestForming.features
+namespace WebUser.shared.RequestForming.features
 {
     public class PagedList<T> : List<T>
     {
-        public PagesStat pagesStat { get; }
+        public PagesStat PagesStat { get; }
+
         public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
         {
-            pagesStat = new PagesStat()
+            PagesStat = new PagesStat()
             {
                 TotalCount = count,
                 CurrentPage = pageNumber,
@@ -14,12 +15,8 @@
             };
             AddRange(items);
         }
-        public static PagedList<T> PaginateList(IEnumerable<T> source, int count, int pageNumber, int pageSize)
-        {
 
-           // var count = source.Count();
-           // var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
-            return new PagedList<T>(source, count, pageNumber, pageSize);
-        }
+        public static PagedList<T> PaginateList(IEnumerable<T> source, int count, int pageNumber, int pageSize) =>
+            new PagedList<T>(source, count, pageNumber, pageSize);
     }
 }

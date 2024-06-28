@@ -1,10 +1,10 @@
-﻿namespace WebUser.features.CartItem.Exceptions
-{
-    public class CartItemNotFoundException:Exception
-    {
-        public CartItemNotFoundException(int id) : base($"Cart item with ID {id} doesnt exists")
-        {
+using WebUser.Domain.exceptions;
 
-        }
+namespace WebUser.features.CartItem.Exceptions
+{
+    public class CartItemNotFoundException : NotFoundException
+    {
+        public CartItemNotFoundException(int cartItemId)
+            : base($"Product doesnt exists in cart {cartItemId}") { }
     }
 }

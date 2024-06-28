@@ -1,45 +1,41 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using WebUser.Data;
 using WebUser.features.Image.DTO;
 using WebUser.features.Image.Exceptions;
 using WebUser.features.Product.Exceptions;
-using WebUser.shared;
-using WebUser.shared.RepoWrapper;
-using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Image.Functions
 {
     public class GetImagesByProductID
     {
-        public class GetImageByProductIDQuery : IRequest<ICollection<ImageDTO>>
+        public class GetImagesByProductIDQuery : IRequest<List<ImageDTO>>
         {
             public int ProductId { get; set; }
         }
-        //handler
-        public class Handler : IRequestHandler<GetImageByProductIDQuery, ICollection<ImageDTO>>
-        {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+        //handler
+        public class Handler : IRequestHandler<GetImagesByProductIDQuery, List<ImageDTO>>
+        {
+            private readonly IMapper mapper;
+            private readonly DB_Context dbcontext;
+
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
-            public async Task<ICollection<ImageDTO>> Handle(GetImageByProductIDQuery request, CancellationToken cancellationToken)
+            public async Task<List<ImageDTO>> Handle(GetImagesByProductIDQuery request, CancellationToken cancellationToken)
             {
-                if(!(await _repoWrapper.Product.IsExistsAsync(new ObjectID<E.Product>(request.ProductId))))
+                if (await dbcontext.Products.AnyAsync(q => q.ID == request.ProductId, cancellationToken: cancellationToken))
                     throw new ProductNotFoundException(request.ProductId);
-                
-                    var imgs = await _repoWrapper.Image.GetByProductIdAsync(new ObjectID<E.Product>(request.ProductId));
-                if(imgs == null)
-                {
-                    throw new ImageNotFoundException(-1);
-                }
-                    var results = _mapper.Map<ICollection<ImageDTO>>(imgs);
-                    return results;
-                
+                var images =
+                    await dbcontext.Img.Where(q => q.Product.ID == request.ProductId).ToListAsync(cancellationToken: cancellationToken)
+                    ?? throw new ImageNotFoundException(-1);
+                var results = mapper.Map<List<ImageDTO>>(images);
+                return results;
             }
         }
     }

@@ -1,12 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using E=WebUser.Domain.entities;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Order.DTO
 {
     public class UpdateOrderDTO
     {
-        public ICollection<E.OrderProduct> products { get; set; }
+        public List<E.OrderProduct> products { get; set; }
         public E.User User { get; set; }
         public string DeliveryAddress { get; set; }
         public int DeliveryMethod { get; set; }

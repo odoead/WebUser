@@ -1,12 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MediatR;
-using E = WebUser.Domain.entities;
-using WebUser.shared.RepoWrapper;
-using WebUser.features.AttributeValue.DTO;
+using WebUser.Data;
 using WebUser.features.Point.DTO;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using WebUser.Domain.entities;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Point.Functions
 {
@@ -15,42 +11,41 @@ namespace WebUser.features.Point.Functions
         //input
         public class CreatePointCommand : IRequest<PointDTO>
         {
-            public int ID { get; set; }
             public int Value { get; set; }
             public bool isExpirable { get; set; }
             public DateTime ExpireDate { get; set; }
-            public User User { get; set; }
+            public E.User User { get; set; }
         }
+
         //handler
         public class Handler : IRequestHandler<CreatePointCommand, PointDTO>
         {
-            private IRepoWrapper _repoWrapper;
-            private IMapper _mapper;
+            private readonly DB_Context dbcontext;
+            private readonly IMapper mapper;
 
-            public Handler(IRepoWrapper ServiceWrapper, IMapper mapper)
+            public Handler(DB_Context context, IMapper mapper)
             {
-                _repoWrapper = ServiceWrapper;
-                _mapper = mapper;
+                dbcontext = context;
+                this.mapper = mapper;
             }
 
             public async Task<PointDTO> Handle(CreatePointCommand request, CancellationToken cancellationToken)
             {
                 var point = new E.Point
                 {
-                    CreateDate = DateTime.Now,
+                    CreateDate = DateTime.UtcNow,
                     ExpireDate = request.ExpireDate,
                     User = request.User,
-                    ID = request.ID,
-                    isExpirable = request.isExpirable,
-                    UserId = request.User.Id,
+                    IsExpirable = request.isExpirable,
                     Value = request.Value,
+                    BalanceLeft = request.Value,
+                    IsUsed = false,
                 };
-                _repoWrapper.Point.Create(point);
-                await _repoWrapper.SaveAsync();
-                var results = _mapper.Map<PointDTO>(point);
+                await dbcontext.Points.AddAsync(point, cancellationToken);
+                await dbcontext.SaveChangesAsync(cancellationToken);
+                var results = mapper.Map<PointDTO>(point);
                 return results;
             }
         }
-
     }
 }

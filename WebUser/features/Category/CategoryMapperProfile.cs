@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using Entities=WebUser.Domain.entities;
+using AutoMapper;
 using WebUser.features.Category.DTO;
-using WebUser.features.AttributeValue.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart
 {
@@ -9,8 +8,12 @@ namespace WebUser.features.Cart
     {
         public CategoryMapperProfile()
         {
-            CreateMap<Entities.Category, AttributeValueDTO>().ReverseMap();
-            CreateMap<Entities.Category, AttributeValueUpdateDTO>().ReverseMap();
+            CreateMap<E.Category, CategoryDTO>()
+                .ForMember(dest => dest.Attributes, opt => opt.MapFrom(src => src.Attributes))
+                .ForMember(dest => dest.ParentCategory, opt => opt.MapFrom(src => src.ParentCategory))
+                .ForMember(dest => dest.Subcategories, opt => opt.MapFrom(src => src.Subcategories))
+                .ReverseMap();
+            CreateMap<E.Category, CategoryMinDTO>().ReverseMap();
         }
     }
 }

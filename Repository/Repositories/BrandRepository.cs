@@ -5,13 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebUser.Repository
 {
-    public class BrandRepository : IBrandRepo 
+    public class BrandRepository : IBrandRepo
     {
         private AppDbContext DBContext;
+
         public BrandRepository(AppDbContext db)
         {
             DBContext = db;
         }
+
         public Task<bool> CreateAsync(BrandDTO entity)
         {
             throw new NotImplementedException();

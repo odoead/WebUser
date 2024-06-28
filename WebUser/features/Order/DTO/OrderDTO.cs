@@ -1,5 +1,6 @@
-﻿using WebUser.Domain.entities;
-using E = WebUser.Domain.entities;
+using WebUser.features.Coupon.DTO;
+using WebUser.features.OrderProduct.DTO;
+using WebUser.features.Point.DTO;
 
 namespace WebUser.features.Order.DTO
 {
@@ -10,12 +11,12 @@ namespace WebUser.features.Order.DTO
         public int DeliveryMethod { get; set; }
         public int PaymentMethod { get; set; }
         public bool Status { get; set; }
+        public double Payment { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ICollection<E.Coupon>? ActivatedCoupons { get; set; } = null;
-        public ICollection<E.OrderProduct>? OrderProduct { get; set; } = null;
-        public User? User { get; set; } = null;
-        public int? PointsUsed { get; set; }
-        public ICollection<E.Point>? Points { get; set; } = null;
+        public List<CouponMinDTO>? ActivatedCoupons { get; set; } = new List<CouponMinDTO>();
+        public List<PointMinDTO>? ActivatedPoints { get; set; } = new List<PointMinDTO>();
+        public List<OrderProductDTO> OrderProducts { get; set; }
+        public string UserID { get; set; }
+        public int? PointsUsed { get; set; } = null;
     }
 }
-

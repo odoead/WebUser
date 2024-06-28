@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebUser.Domain.entities
 {
@@ -7,14 +7,21 @@ namespace WebUser.Domain.entities
     {
         [Key]
         public int ID { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed,excluding 0")]
         [Required]
         public int Amount { get; set; }
-        [ForeignKey("ProductId")]
+
+        [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
+        public double FinalPrice { get; set; }
+
+        [ForeignKey("ProductID")]
         public Product Product { get; set; }
-        public int? ProductId { get; set; }
-        [ForeignKey("OrderId")]
+        public int ProductID { get; set; }
+
+        [ForeignKey("OrderID")]
         public Order Order { get; set; }
-        public int? OrderId { get; set; }
+        public int OrderID { get; set; }
+        public ICollection<Coupon> ActivatedCoupons { get; set; }
     }
 }

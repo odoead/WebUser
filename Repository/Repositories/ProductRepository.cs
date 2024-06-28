@@ -7,10 +7,12 @@ namespace WebUser.Repository
     public class ProductRepository : IProductRepo
     {
         private AppDbContext DBContext;
+
         public ProductRepository(AppDbContext db)
         {
             DBContext = db;
         }
+
         public Task<bool> CreateAsync(ProductDTO entity)
         {
             throw new NotImplementedException();
