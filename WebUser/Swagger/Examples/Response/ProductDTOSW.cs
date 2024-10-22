@@ -11,7 +11,7 @@ namespace WebUser.features.Product.DTO
     public class ProductDTOSW : IExamplesProvider<ProductDTO>
     {
         public ProductDTO GetExamples() =>
-            new ProductDTO
+            new()
             {
                 ID = 1,
                 Description = "description",
@@ -23,44 +23,44 @@ namespace WebUser.features.Product.DTO
                 DateCreated = DateTime.UtcNow,
                 Images = new List<ImageDTO>
                 {
-                    new ImageDTO { ID = 1, ImageContent = new byte[] { } }
+                    new() { ID = 1, ImageContent = new byte[] { } },
                 },
                 AttributeValues = new List<AttributeNameValueDTO>()
                 {
-                    new AttributeNameValueDTO
+                    new()
                     {
                         AttributeName = new AttributeNameMinDTO { ID = 1, Name = "Color" },
                         Attributes = new List<AttributeValueDTO>
                         {
-                            new AttributeValueDTO { ID = 1, Value = "Red" },
-                            new AttributeValueDTO { ID = 2, Value = "Blue" }
-                        }
-                    }
+                            new() { ID = 1, Value = "Red" },
+                            new() { ID = 2, Value = "Blue" },
+                        },
+                    },
                 },
                 Discounts = new List<DiscountMinDTO>()
                 {
-                    new DiscountMinDTO
+                    new()
                     {
                         ID = 1,
                         DiscountVal = 56,
                         DiscountPercent = 0,
-                        IsActive = true
-                    }
+                        IsActive = true,
+                    },
                 },
                 Coupons = new List<CouponMinDTO>()
                 {
-                    new CouponMinDTO
+                    new()
                     {
                         ID = 1,
                         DiscountVal = 100,
                         DiscountPercent = 5,
-                        IsActive = true
-                    }
+                        IsActive = true,
+                    },
                 },
                 Promotions = new List<PromotionMinDTO>()
                 {
-                    new PromotionMinDTO { ID = 1, Name = "sale" }
-                }
+                    new() { ID = 1, Name = "sale" },
+                },
             };
     }
 }

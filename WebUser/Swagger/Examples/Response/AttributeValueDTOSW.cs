@@ -4,6 +4,6 @@ namespace WebUser.features.AttributeValue.DTO
 {
     public class AttributeValueDTOSW : IExamplesProvider<AttributeValueDTO>
     {
-        public AttributeValueDTO GetExamples() => new AttributeValueDTO { Value = "red", ID = 1 };
+        public AttributeValueDTO GetExamples() => new() { Value = "red", ID = 1 };
     }
 }

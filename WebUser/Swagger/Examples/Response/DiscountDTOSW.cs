@@ -6,7 +6,7 @@ namespace WebUser.features.discount.DTO
     public class DiscountDTOSW : IExamplesProvider<DiscountDTO>
     {
         public DiscountDTO GetExamples() =>
-            new DiscountDTO
+            new()
             {
                 DiscountVal = 50,
                 DiscountPercent = 0,
@@ -19,8 +19,8 @@ namespace WebUser.features.discount.DTO
                 {
                     ID = 1,
                     Name = "table",
-                    Price = 500
-                }
+                    Price = 500,
+                },
             };
     }
 }

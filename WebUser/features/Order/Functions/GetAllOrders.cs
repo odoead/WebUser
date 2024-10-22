@@ -1,9 +1,10 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.features.AttributeName.DTO;
 using WebUser.features.Order.DTO;
+using WebUser.features.OrderProduct.DTO;
+using WebUser.features.Point.DTO;
+using WebUser.features.Product.DTO;
 using WebUser.shared.RequestForming.features;
 
 namespace WebUser.features.Order.Functions
@@ -11,28 +12,82 @@ namespace WebUser.features.Order.Functions
     public class GetAllOrders
     {
         //input
-        public class GetAllOrdersAsyncQuery : IRequest<ICollection<OrderDTO>>
+        public class GetAllOrdersAsyncQuery : IRequest<PagedList<OrderDTO>>
         {
-            public RequestParameters Parameters { get; set; }
+            public OrderRequestParameters Parameters { get; set; }
+
+            public GetAllOrdersAsyncQuery(OrderRequestParameters parameters)
+            {
+                Parameters = parameters;
+            }
         }
 
         //handler
-        public class Handler : IRequestHandler<GetAllOrdersAsyncQuery, ICollection<OrderDTO>>
+        public class Handler : IRequestHandler<GetAllOrdersAsyncQuery, PagedList<OrderDTO>>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(DB_Context context, IMapper mapper)
+
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
-            public async Task<ICollection<OrderDTO>> Handle(GetAllOrdersAsyncQuery request, CancellationToken cancellationToken)
+            public async Task<PagedList<OrderDTO>> Handle(GetAllOrdersAsyncQuery request, CancellationToken cancellationToken)
             {
-                var order = await dbcontext.Orders.ToListAsync(cancellationToken: cancellationToken);
-                var results = mapper.Map<ICollection<OrderDTO>>(order);
-                return PagedList<OrderDTO>.PaginateList(results, results.Count, request.Parameters.PageNum, request.Parameters.PageSize);
+                var data = dbcontext.Orders.Include(q => q.Points).Include(q => q.OrderProduct).ThenInclude(q => q.Product).AsQueryable();
+                var orderDTOs = new List<OrderDTO>();
+                foreach (var order in data)
+                {
+                    var orderDTO = new OrderDTO
+                    {
+                        ID = order.ID,
+                        CreatedAt = order.CreatedAt,
+                        DeliveryAddress = order.DeliveryAddress,
+                        DeliveryMethod = order.DeliveryMethod,
+                        PaymentMethod = order.PaymentMethod,
+                        Status = order.Status,
+                        Payment = order.Payment,
+                        UserID = order.UserID,
+                        PointsUsed = order.PointsUsed,
+                        OrderProducts = order
+                            .OrderProduct.Select(op => new OrderProductDTO
+                            {
+                                ID = op.ProductID,
+                                Amount = op.Amount,
+                                FinalPrice = op.FinalPrice,
+                                TotalFinalPrice = op.FinalPrice * op.Amount,
+                                Product = new ProductMinDTO
+                                {
+                                    ID = op.ProductID,
+                                    Name = op.Product.Name,
+                                    Price = op.Product.Price,
+                                },
+                            })
+                            .ToList(),
+                        ActivatedPoints = order
+                            .Points.Select(p => new PointMinDTO
+                            {
+                                BalanceLeft = p.BalanceLeft,
+                                ID = p.ID,
+                                IsUsed = p.IsUsed,
+                                Value = p.Value,
+                                IsActive = p.IsUsed,
+                            })
+                            .ToList(),
+                    };
+                    orderDTOs.Add(orderDTO);
+                }
+
+                var pagedList = PagedList<OrderDTO>.PaginateList(
+                    source: orderDTOs,
+                    totalCount: await data.CountAsync(cancellationToken),
+                    pageNumber: request.Parameters.PageNumber,
+                    pageSize: request.Parameters.PageSize
+                );
+
+                return pagedList;
             }
         }
     }

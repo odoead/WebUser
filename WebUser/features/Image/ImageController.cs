@@ -2,8 +2,8 @@ namespace WebUser.features.Image;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.Coupon.DTO;
 using WebUser.features.Image.DTO;
 using WebUser.features.Image.Functions;
 
@@ -22,6 +22,7 @@ public class ImageController : ControllerBase
     }
 
     [HttpGet("product/{id:int}", Name = "GetImageByProductID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<ImageDTO>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetImagesByProductID(int id)
     {

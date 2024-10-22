@@ -3,23 +3,28 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace WebUser.shared
 {
-    public class ValidationFilterAttribute : IActionFilter
+    [AttributeUsage(AttributeTargets.All)]
+    public class ValidationFilterAttribute : Attribute, IAsyncActionFilter
     {
-        public void OnActionExecuting(ActionExecutingContext context)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var action = context.RouteData.Values["action"];
             var controller = context.RouteData.Values["controller"];
             var param = context.ActionArguments.SingleOrDefault().Value;
+
             if (param == null)
             {
                 context.Result = new BadRequestObjectResult($"Object is null. Controller: {controller}, action: {action}");
+                return;
             }
-            else if (!context.ModelState.IsValid)
+
+            if (!context.ModelState.IsValid)
             {
                 context.Result = new UnprocessableEntityObjectResult(context.ModelState);
+                return;
             }
-        }
 
-        public void OnActionExecuted(ActionExecutedContext context) { }
+            await next();
+        }
     }
 }

@@ -6,13 +6,13 @@ namespace WebUser.features.OrderProduct.DTO
     public class OrderProductDTOSW : IExamplesProvider<OrderProductDTO>
     {
         public OrderProductDTO GetExamples() =>
-            new OrderProductDTO
+            new()
             {
                 ID = 1,
                 Amount = 2,
                 Product = new ProductMinDTO { ID = 1, Name = "apple" },
                 FinalPrice = 20.0,
-                TotalFinalPrice = 40
+                TotalFinalPrice = 40,
             };
     }
 }

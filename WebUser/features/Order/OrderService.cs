@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Order.Interfaces;
 using WebUser.features.Promotion.PromoBuilder.Actions;
@@ -15,108 +16,133 @@ namespace WebUser.features.Order
             this.dbcontext = context;
         }
 
-        public List<(E.CartItem, double)> ApplyDiscount(E.Cart cart)
+        /// <summary>
+        /// apllies active discounts to the cart items
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns>list items and their discount value</returns>
+        public List<(E.CartItem, double)> ApplyDiscount(IQueryable<E.Cart> cart)
         {
             var itemDiscounts = new List<(E.CartItem, double)>();
-            var cartItems = cart.Items;
+            var cartItems = cart.SelectMany(q => q.Items);
             foreach (var item in cartItems)
             {
-                var discount = dbcontext
-                    .Discounts.Where(q => item.ProductID == q.ProductID && q.ActiveFrom <= DateTime.UtcNow && q.ActiveTo >= DateTime.UtcNow)
-                    .FirstOrDefault();
+                var discount = dbcontext.Discounts.Where(q => item.ProductID == q.ProductID && E.Discount.IsActive(q)).FirstOrDefault();
                 var basePrice = item.Product.Price;
                 double discountVal = 0;
-                if (discount.DiscountVal > 0)
+                if (discount.DiscountVal.HasValue && discount.DiscountVal.Value > 0)
                 {
-                    discountVal += discount.DiscountVal;
+                    discountVal += discount.DiscountVal.Value;
                 }
-                if (discount.DiscountPercent > 0)
+                if (discount.DiscountPercent.HasValue && discount.DiscountPercent > 0)
                 {
-                    discountVal += basePrice * discount.DiscountPercent / 100;
+                    discountVal += basePrice * discount.DiscountPercent.Value / 100;
                 }
                 itemDiscounts.Add((item, discountVal));
             }
             return itemDiscounts;
         }
 
-        public List<(E.CartItem, double)> ApplyCoupons(E.Cart cart, string couponsCodes)
+        /// <summary>
+        /// apllies entered coupons to the cart items
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <param name="couponsCodes"></param>
+        /// <returns>list of items and their discount value and list of activated coupons</returns>
+        public (List<(E.CartItem, double)>, List<(E.CartItem, E.Coupon)>) ApplyCoupons(IQueryable<E.Cart> cart, string couponsCodes)
         {
             char[] splitChars = { ' ', ',', ';', '-', '_', '.', ':', '\t' };
             List<string> inputCodes = couponsCodes.ToLower().Split(splitChars).ToList();
-            var coupons = dbcontext.Coupons.Where(q => inputCodes.Contains(q.Code)).ToList();
+            var activatedCoupons = new List<(E.CartItem, E.Coupon)>();
+            var coupons = dbcontext.Coupons.Where(q => inputCodes.Contains(q.Code) && E.Coupon.IsActive(q)).ToList();
             var itemDiscounts = new List<(E.CartItem, double)>();
-            var cartItems = cart.Items;
+            var cartItems = cart.SelectMany(q => q.Items);
             foreach (var coupon in coupons)
             {
-                if (coupon.ActiveFrom <= DateTime.UtcNow && coupon.ActiveTo >= DateTime.UtcNow && coupon.IsActivated == false && coupon.Order == null)
+                foreach (var product in cartItems)
                 {
-                    foreach (var productI in cartItems)
+                    if (coupon.ProductID == product.ProductID)
                     {
-                        if (coupon.Product.ID == productI.Product.ID)
+                        var basePrice = coupon.Product.Price;
+                        double discountVal = 0;
+                        if (coupon.DiscountVal > 0)
                         {
-                            var basePrice = coupon.Product.Price;
-                            double discountVal = 0;
-                            if (coupon.DiscountVal > 0)
-                            {
-                                discountVal += coupon.DiscountVal;
-                            }
-                            if (coupon.DiscountPercent > 0)
-                            {
-                                discountVal += basePrice * coupon.DiscountPercent / 100;
-                            }
-                            coupon.IsActivated = true;
-                            var orderProduct = dbcontext.OrderProducts.FirstOrDefault(q => q.Product.ID == productI.Product.ID);
-                            orderProduct.ActivatedCoupons.Add(coupon);
-                            itemDiscounts.Add((productI, discountVal));
+                            discountVal += coupon.DiscountVal.Value;
                         }
+                        if (coupon.DiscountPercent > 0)
+                        {
+                            discountVal += basePrice * coupon.DiscountPercent.Value / 100;
+                        }
+                        coupon.IsActivated = true;
+                        activatedCoupons.Add((product, coupon));
+                        itemDiscounts.Add((product, discountVal));
                     }
                 }
             }
-            return itemDiscounts;
+            return (itemDiscounts, activatedCoupons);
         }
 
+        /// <summary>
+        /// apllies user's availible points to the cart items
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="pointsValue"></param>
+        /// <returns>List of used point or empty list if there's not enought points on user balance</returns>
         public ICollection<E.Point> ApplyPoints(E.User user, int pointsValue)
         {
-            var points = dbcontext.Points.Where(q => q.User.Id == user.Id).ToList();
+            var points = dbcontext.Points.Where(q => q.UserID == user.Id).ToList();
             int pointsUsed = 0;
             List<E.Point> activatedPoints = new List<E.Point>();
-            int totalPointsAvailable = user
-                .Points.Where(q => !q.IsUsed && (q.IsExpirable == false || q.ExpireDate >= DateTime.UtcNow))
-                .Sum(w => w.Value);
-            if (totalPointsAvailable > pointsValue)
+            int totalPointsAvailable = points.Where(q => E.Point.IsActive(q)).Sum(w => w.Value);
+            if (totalPointsAvailable < pointsValue)
             {
-                foreach (var item in points)
+                return activatedPoints;
+            }
+            foreach (var point in points)
+            {
+                if (E.Point.IsActive(point) && pointsValue > pointsUsed)
                 {
-                    if ((item.IsExpirable == false || item.ExpireDate >= DateTime.UtcNow) && pointsValue > pointsUsed && item.IsUsed == false)
+                    if (point.BalanceLeft > 0)
                     {
-                        if (item.BalanceLeft > 0)
-                        {
-                            pointsUsed += Math.Min(item.BalanceLeft, pointsValue - pointsUsed);
-                            item.IsUsed = true;
-                            activatedPoints.Add(item);
-                            item.BalanceLeft -= Math.Min(item.BalanceLeft, pointsValue - pointsUsed);
-                        }
+                        pointsUsed += Math.Min(point.BalanceLeft, pointsValue - pointsUsed);
+                        point.BalanceLeft -= Math.Min(point.BalanceLeft, pointsValue - pointsUsed);
+                        point.IsUsed = true;
+                        activatedPoints.Add(point);
                     }
-                    if (pointsValue <= pointsUsed)
-                        break;
+                }
+                if (pointsValue <= pointsUsed)
+                {
+                    break;
                 }
             }
-            else
-            {
-                return null;
-            }
+
             return activatedPoints;
         }
 
-        public (List<(E.CartItem, double)>, E.Point) ApplyPromos(E.Cart cart)
+        /// <summary>
+        /// apllies active promo to the cart items
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns>list items and their discount value</returns>
+        public (List<(E.CartItem, double)>, E.Point) ApplyPromos(IQueryable<E.Cart> cart)
         {
-            var promos = dbcontext.Promotions.ToList();
+            var promos = dbcontext
+                .Promotions.Include(q => q.AttributeValues)
+                .ThenInclude(q => q.AttributeValue)
+                .Include(q => q.Categories)
+                .ThenInclude(q => q.Category)
+                .Include(q => q.Products)
+                .ThenInclude(q => q.Product)
+                .Include(q => q.PromProducts)
+                .ThenInclude(q => q.Product)
+                .Include(q => q)
+                .AsQueryable();
             var point = new E.Point();
             var promoItem = new List<(E.CartItem, double)>();
             List<bool> conditionsResult = new List<bool>();
             foreach (var promotion in promos)
             {
-                if (promotion.ActiveTo > DateTime.UtcNow && promotion.ActiveFrom < DateTime.UtcNow)
+                if (E.Promotion.IsActive(promotion))
                 {
                     if (promotion.AttributeValues.Any())
                     {
@@ -128,43 +154,45 @@ namespace WebUser.features.Order
                     }
                     if (promotion.MinPay > 0)
                     {
-                        conditionsResult.Add(cart.PriceBiggerThan(promotion.MinPay));
+                        conditionsResult.Add(cart.IsPriceBiggerThan((int)promotion.MinPay.Value));
                     }
-                    if (promotion.IsFirstOrder)
+                    if (promotion.IsFirstOrder.Value)
                     {
                         conditionsResult.Add(cart.IsFirstOrder());
                     }
-                    if (promotion.Products.Any())
+                    if (promotion.BuyQuantity > 0 && promotion.Products.Any())
+                    {
+                        conditionsResult.Add(cart.HasProducts(promotion.Products.Select(q => q.Product), promotion.BuyQuantity.Value));
+                    }
+                    else if (promotion.Products.Any())
                     {
                         conditionsResult.Add(cart.HasProducts(promotion.Products.Select(q => q.Product)));
                     }
-                    if (promotion.BuyQuantity > 0)
-                    {
-                        conditionsResult.Add(cart.HasProducts(promotion.Products.Select(q => q.Product), promotion.BuyQuantity));
-                    }
+
                     if (!conditionsResult.Contains(false))
                     {
-                        if (promotion.DiscountPercent > 0 || promotion.DiscountVal > 0)
-                        {
-                            promoItem.AddRange(cart.GetDiscountAct(promotion.DiscountVal, promotion.DiscountPercent));
-                        }
-                        if ((promotion.DiscountPercent > 0 || promotion.DiscountVal > 0) && promotion.PromoProducts.Any())
+                        if ((promotion.DiscountPercent > 0 || promotion.DiscountVal > 0) && promotion.PromProducts.Any())
                         {
                             promoItem.AddRange(
                                 cart.GetDiscountForItemtAct(
-                                    promotion.PromoProducts.Select(q => q.Product),
-                                    promotion.DiscountVal,
-                                    promotion.DiscountPercent
+                                    promotion.PromProducts.Select(q => q.Product),
+                                    promotion.DiscountVal.Value,
+                                    promotion.DiscountPercent.Value
                                 )
                             );
                         }
+                        else if (promotion.DiscountPercent > 0 || promotion.DiscountVal > 0)
+                        {
+                            promoItem.AddRange(cart.GetDiscountAct(promotion.DiscountVal.Value, promotion.DiscountPercent.Value));
+                        }
+
                         if (promotion.PointsPercent > 0 || promotion.PointsValue > 0)
                         {
-                            point = cart.GetPointsAct(promotion.PointsValue, promotion.PointsPercent, promotion.PointsExpireDays);
+                            point = cart.GetPointsAct(promotion.PointsValue.Value, promotion.PointsPercent.Value, promotion.PointsExpireDays.Value);
                         }
-                        if (promotion.PromoProducts.Any() && promotion.GetQuantity > 0)
+                        if (promotion.PromProducts.Any() && promotion.GetQuantity > 0)
                         {
-                            promoItem.AddRange(cart.GetFreeItemAct(promotion.PromoProducts.Select(q => q.Product), promotion.GetQuantity));
+                            promoItem.AddRange(cart.GetFreeItemAct(promotion.PromProducts.Select(q => q.Product), promotion.GetQuantity.Value));
                         }
                     }
                 }

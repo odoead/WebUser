@@ -2,10 +2,12 @@ namespace WebUser.features.Cart.functions;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.AttributeValue.DTO;
 using WebUser.features.Cart.DTO;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -21,16 +23,19 @@ public class CartController : ControllerBase
         this.mediator = mediator;
     }
 
-    [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [HttpPost("user/{userID}")]
+    [Authorize(Roles = "Admin")]
+    [ValidationFilter]
     [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.Created)]
-    public async Task<ActionResult> Create([FromBody] CreateCart.CreateCartCommand command)
+    public async Task<ActionResult> Create(string userID)
     {
+        var command = new CreateCart.CreateCartCommand { UserId = userID };
         var result = await mediator.Send(command);
-        return CreatedAtRoute("GetCartByID", new { cartId = result.ID }, result);
+        return CreatedAtRoute("GetCartByID", new { id = result.ID }, result);
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> Delete(int id)
     {
@@ -40,15 +45,18 @@ public class CartController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<CartDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<CartDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] CartRequestParameters request)
     {
-        var query = new GetAllCarts.GetAllCartsQuery();
+        var query = new GetAllCarts.GetAllCartsQuery(request);
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetCartByID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
     {
@@ -58,6 +66,7 @@ public class CartController : ControllerBase
     }
 
     [HttpGet("user/{id}", Name = "GetCartByUserID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> GetByUserId(string id)
     {
@@ -66,33 +75,59 @@ public class CartController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPatch("{id:int}/product/{productid:int}/add")]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [HttpPost("{id:int}/product/{productid:int}")]
+    [Authorize(Roles = "User")]
+    [ValidationFilter]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> AddProduct(int id, int productid, [FromBody] int amount)
     {
-        var command = new AddProductsToCart.AddProductToCartCommand
+        if (amount <= 0)
+        {
+            return BadRequest("Amount must be greater than 0.");
+        }
+        var command = new AddProductToCart.AddProductToCartCommand
         {
             Amount = amount,
             CartId = id,
-            ProductId = productid
+            ProductId = productid,
         };
         await mediator.Send(command);
         return NoContent();
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="id">test</param>
-    /// <param name="productid"></param>
-    /// <returns></returns>
-    [HttpDelete("{id:int}/product/{productid:int}/remove")]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [HttpPatch("{id:int}/product/{productid:int}")]
+    [Authorize(Roles = "User")]
+    [ValidationFilter]
+    [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+    public async Task<ActionResult> UpdateProduct(int id, int productid, [FromBody] int amount)
+    {
+        if (amount < 0)
+        {
+            return BadRequest("Amount cannot be negative.");
+        }
+
+        var command = new ChangeAmountRemoveProductFromCart.ChangeAmountRemoveProductFromCartCommand
+        {
+            CartId = id,
+            ProductId = productid,
+            NewAmount = amount,
+        };
+        await mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}/product/{productid:int}")]
+    [ValidationFilter]
+    [Authorize(Roles = "User")]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> RemoveProduct(int id, int productid)
     {
-        var command = new RemoveProductFromCart.RemoveProductFromCartCommand { CartId = id, ProductId = productid, };
+        var command = new ChangeAmountRemoveProductFromCart.ChangeAmountRemoveProductFromCartCommand
+        {
+            NewAmount = 0,
+            CartId = id,
+            ProductId = productid,
+        };
         await mediator.Send(command);
         return NoContent();
     }

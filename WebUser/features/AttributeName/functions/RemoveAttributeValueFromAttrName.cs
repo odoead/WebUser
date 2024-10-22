@@ -29,12 +29,13 @@ namespace WebUser.features.AttributeName.functions
                         .AttributeNames.Include(q => q.AttributeValues)
                         .FirstOrDefaultAsync(q => q.ID == request.AttributeNameId, cancellationToken: cancellationToken)
                     ?? throw new AttributeNameNotFoundException(request.AttributeNameId);
+
                 var attributeValue = await dbcontext
-                    .AttributeValues.Where(q => q.AttributeName == attributeName && q.ID == request.AttributeValueId)
+                    .AttributeValues.Where(q => q.AttributeNameID == request.AttributeNameId && q.ID == request.AttributeValueId)
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (attributeValue != null)
                 {
-                    attributeValue.AttributeName = null;
+                    dbcontext.AttributeValues.Remove(attributeValue);
                     await dbcontext.SaveChangesAsync(cancellationToken);
                 }
             }

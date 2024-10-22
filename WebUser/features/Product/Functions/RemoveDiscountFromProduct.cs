@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -29,7 +28,10 @@ namespace WebUser.features.discount.Functions
             public async Task Handle(DeleteDiscountCommand request, CancellationToken cancellationToken)
             {
                 if (!await dbcontext.Products.AnyAsync(q => q.ID == request.ProductID, cancellationToken: cancellationToken))
+                {
                     throw new ProductNotFoundException(request.ProductID);
+                }
+
                 var discount =
                     await dbcontext.Discounts.FirstOrDefaultAsync(
                         q => q.Product.ID == request.ProductID && q.ID == request.DiscountID,

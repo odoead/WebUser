@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -19,7 +18,7 @@ namespace WebUser.features.Coupon.Functions
         {
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
             }

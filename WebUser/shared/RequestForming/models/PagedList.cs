@@ -4,19 +4,19 @@ namespace WebUser.shared.RequestForming.features
     {
         public PagesStat PagesStat { get; }
 
-        public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
+        public PagedList(IEnumerable<T> items, int totalCount, int pageNumber, int pageSize)
         {
             PagesStat = new PagesStat()
             {
-                TotalCount = count,
+                TotalCount = totalCount,
                 CurrentPage = pageNumber,
                 PageSize = pageSize,
-                PageCount = (int)Math.Ceiling(count / (double)pageSize)
+                PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
             };
             AddRange(items);
         }
 
-        public static PagedList<T> PaginateList(IEnumerable<T> source, int count, int pageNumber, int pageSize) =>
-            new PagedList<T>(source, count, pageNumber, pageSize);
+        public static PagedList<T> PaginateList(IEnumerable<T> source, int totalCount, int pageNumber, int pageSize) =>
+            new(source, totalCount, pageNumber, pageSize);
     }
 }

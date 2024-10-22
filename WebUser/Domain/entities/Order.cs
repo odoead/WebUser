@@ -24,7 +24,7 @@ namespace WebUser.Domain.entities
         public DateTime CreatedAt { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public int PointsUsed { get; set; }
+        public int? PointsUsed { get; set; }
 
         [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
         public double Payment { get; set; }
@@ -32,8 +32,7 @@ namespace WebUser.Domain.entities
         [ForeignKey("UserID")]
         public User User { get; set; }
         public string UserID { get; set; }
-        public ICollection<Coupon> ActivatedCoupons { get; set; }
-        public ICollection<Point> Points { get; set; }
-        public ICollection<OrderProduct> OrderProduct { get; set; }
+        public ICollection<Point> Points { get; set; } = new List<Point>();
+        public ICollection<OrderProduct> OrderProduct { get; set; } = new List<OrderProduct>();
     }
 }

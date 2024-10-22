@@ -7,7 +7,7 @@ using WebUser.features.Image.DTO;
 public class ProductThumbnailDTOSW : IExamplesProvider<ProductThumbnailDTO>
 {
     public ProductThumbnailDTO GetExamples() =>
-        new ProductThumbnailDTO
+        new()
         {
             ID = 1,
             Name = "smartphone1",
@@ -15,17 +15,17 @@ public class ProductThumbnailDTOSW : IExamplesProvider<ProductThumbnailDTO>
             IsPurchasable = true,
             Images = new List<ImageDTO>
             {
-                new ImageDTO { ID = 1, ImageContent = new byte[] { } }
+                new() { ID = 1, ImageContent = new byte[] { } },
             },
             Discounts = new List<DiscountMinDTO>()
             {
-                new DiscountMinDTO
+                new()
                 {
                     ID = 1,
                     DiscountVal = 56,
                     DiscountPercent = 0,
-                    IsActive = true
-                }
+                    IsActive = true,
+                },
             },
         };
 }

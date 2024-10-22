@@ -5,7 +5,7 @@ namespace WebUser.features.Point.DTO
     public class PointDTOSW : IExamplesProvider<PointDTO>
     {
         public PointDTO GetExamples() =>
-            new PointDTO
+            new()
             {
                 ID = 1,
                 Value = 100,
@@ -16,7 +16,7 @@ namespace WebUser.features.Point.DTO
                 CreateDate = DateTime.UtcNow,
                 ExpireDate = DateTime.UtcNow.AddDays(30),
                 UserID = "user123",
-                OrderID = null
+                OrderID = null,
             };
     }
 }

@@ -5,15 +5,22 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
     public class SpendCondition : PromotionCondition<E.Cart>
     {
         public SpendCondition(double minCost)
-            : base(q => q.Items.Select(q => q.Product.Price).Sum() > minCost) { }
+            : base(q => q.Items.Select(q => q.Product.Price).Sum() >= minCost) { }
     }
 
-    public static class CoustConditionExtention
+    public static class SpendConditionExtention
     {
-        public static bool PriceBiggerThan(this E.Cart cart, double minCost)
+        public static bool IsPriceBiggerThan(this E.Cart cart, int minCost)
         {
             var specification = new SpendCondition(minCost);
             bool result = specification.ApplyRule(cart);
+            return result;
+        }
+
+        public static bool IsPriceBiggerThan(this IQueryable<E.Cart> carts, int minCost)
+        {
+            var specification = new SpendCondition(minCost);
+            bool result = specification.ApplyRule(carts.FirstOrDefault());
             return result;
         }
 

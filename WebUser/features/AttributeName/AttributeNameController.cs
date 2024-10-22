@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using WebUser.features.AttributeName.DTO;
 using WebUser.features.AttributeName.functions;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -22,16 +24,18 @@ public class AttributeNameController : ControllerBase
     }
 
     [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    // [Authorize(Roles = "Admin")]
+    [ValidationFilter]
     [ProducesResponseType(typeof(AttributeNameDTO), (int)HttpStatusCode.Created)]
     public async Task<ActionResult> Create([FromBody] CreateAttributeName.CreateAttributeNameCommand command)
     {
         var result = await mediator.Send(command);
-        return CreatedAtRoute("GetAttributeNameByID", new { attributeNameId = result.Id }, result);
+        return CreatedAtRoute("GetAttributeNameByID", new { id = result.Id }, result);
     }
 
-    [HttpPatch("{id:int}/value/add")]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [HttpPost("{id:int}/value")]
+    //[Authorize(Roles = "Admin")]
+    [ValidationFilter]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> AddValue(int id, [FromBody] string value)
     {
@@ -40,8 +44,9 @@ public class AttributeNameController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("{id:int}/value/{valueid:int}/remove")]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+    [HttpDelete("{id:int}/value/{valueid:int}")]
+    //[Authorize(Roles = "Admin")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> RemoveValue(int id, int valueid)
     {
         var command = new RemoveAttributeValueFromAttrName.DeleteAttributeValueCommand { AttributeNameId = id, AttributeValueId = valueid };
@@ -50,7 +55,8 @@ public class AttributeNameController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+    //[Authorize(Roles = "Admin")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> Delete(int id)
     {
         var comm = new DeleteAttributeName.DeleteAttributeNameCommand { ID = id };
@@ -59,15 +65,18 @@ public class AttributeNameController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<AttributeNameDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    //[Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<AttributeNameDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] AttributeNameRequestParameters parameters)
     {
-        var comm = new GetAllAttrNameAsync.GetAllAttrNameQuery();
-        var result = await mediator.Send(comm);
+        var query = new GetAllAttrNameAsync.GetAllAttrNameQuery { Parameters = parameters };
+        var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetAttributeNameByID")]
+    // [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(AttributeNameDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
     {

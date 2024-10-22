@@ -5,7 +5,7 @@ namespace WebUser.features.User.DTO
     public class UserDTOSW : IExamplesProvider<UserDTO>
     {
         public UserDTO GetExamples() =>
-            new UserDTO
+            new()
             {
                 DateCreated = DateTime.UtcNow,
                 FirstName = "John",

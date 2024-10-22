@@ -7,7 +7,9 @@ namespace WebUser.Domain.entities
         [Key]
         public int ID { get; set; }
         public string Description { get; set; }
-        public DateTime DateCreated { get; set; }
+
+        //[Column(TypeName = "Date")]
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         [Required]
         public string Name { get; set; }
@@ -20,13 +22,15 @@ namespace WebUser.Domain.entities
         [Range(0, int.MaxValue, ErrorMessage = "Only positive number and 0 allowed")]
         public int Stock { get; set; }
         public int ReservedStock { get; set; }
-        public ICollection<Image> Images { get; set; }
+        public ICollection<Image> Images { get; set; } = new List<Image>();
         public ICollection<ProductAttributeValue> AttributeValues { get; set; }
-        public ICollection<OrderProduct> OrderProduct { get; set; }
-        public ICollection<Discount> Discounts { get; set; }
-        public ICollection<PromotionProduct> Promotions { get; set; }
-        public ICollection<PromotionPromProduct> PromoPromotions { get; set; }
-        public ICollection<Coupon> Coupons { get; set; }
-        public ICollection<CartItem> CartItems { get; set; }
+        public ICollection<OrderProduct> OrderProduct { get; set; } = new List<OrderProduct>();
+        public ICollection<Discount> Discounts { get; set; } = new List<Discount>();
+        public ICollection<PromotionProduct> Promotions { get; set; } = new List<PromotionProduct>();
+        public ICollection<PromotionPromProduct> PromoPromotions { get; set; } = new List<PromotionPromProduct>();
+        public ICollection<Coupon> Coupons { get; set; } = new List<Coupon>();
+        public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<ProductUserNotificationRequest> RequestNotifications { get; set; }
     }
 }

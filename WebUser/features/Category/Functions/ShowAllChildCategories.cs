@@ -1,8 +1,8 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.features.Cart.DTO;
+using WebUser.features.AttributeName.DTO;
+using WebUser.features.Category.DTO;
 using WebUser.features.Category.Exceptions;
 using WebUser.shared.RepoWrapper;
 
@@ -11,32 +11,53 @@ namespace WebUser.features.Category.Functions
     public class ShowAllChildCategories
     {
         //input
-        public class GetAllChildCategoriesQuery : IRequest<ICollection<CartDTO>>
+        public class GetAllChildCategoriesQuery : IRequest<ICollection<CategoryDTO>>
         {
             public int Id { get; set; }
         }
 
         //handler
-        public class Handler : IRequestHandler<GetAllChildCategoriesQuery, ICollection<CartDTO>>
+        public class Handler : IRequestHandler<GetAllChildCategoriesQuery, ICollection<CategoryDTO>>
         {
-            private readonly IMapper mapper;
-            private readonly DB_Context dbcontext;
-            private readonly IServiceWrapper repo;
 
-            public Handler(DB_Context context, IMapper mapper, IServiceWrapper repository)
+            private readonly DB_Context dbcontext;
+            private readonly IServiceWrapper service;
+
+            public Handler(DB_Context context, IServiceWrapper service)
             {
-                repo = repository;
+                this.service = service;
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
-            public async Task<ICollection<CartDTO>> Handle(GetAllChildCategoriesQuery request, CancellationToken cancellationToken)
+            public async Task<ICollection<CategoryDTO>> Handle(GetAllChildCategoriesQuery request, CancellationToken cancellationToken)
             {
                 if (await dbcontext.Categories.AnyAsync(q => q.ID == request.Id, cancellationToken: cancellationToken))
+                {
                     throw new CategoryNotFoundException(request.Id);
-                var children = await repo.Category.ShowAllChildCategories(request.Id) ?? throw new CategoryNotFoundException(-1);
-                ;
-                var results = mapper.Map<ICollection<CartDTO>>(children);
+                }
+
+                var children = await service.Category.GetAllGenChildCategories(request.Id);
+                //var results = mapper.Map<ICollection<CategoryDTO>>(children);
+                var results = new List<CategoryDTO>();
+                foreach (var category in children)
+                {
+                    var categoryDTO = new CategoryDTO
+                    {
+                        ID = category.ID,
+                        Name = category.Name,
+                        Attributes = category
+                            .Attributes?.Select(attr => new AttributeNameMinDTO { ID = attr.AttributeNameID, Name = attr.AttributeName.Name })
+                            .ToList(),
+                        ParentCategory =
+                            category.ParentCategory != null
+                                ? new CategoryMinDTO { ID = category.ParentCategory.ID, Name = category.ParentCategory.Name }
+                                : null,
+                        Subcategories = category.Subcategories?.Select(sub => new CategoryMinDTO { ID = sub.ID, Name = sub.Name }).ToList(),
+                    };
+                    results.Add(categoryDTO);
+                }
+
                 return results;
             }
         }

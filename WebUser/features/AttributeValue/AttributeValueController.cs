@@ -2,11 +2,14 @@ namespace WebUser.features.AttributeValue;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.AttributeName.DTO;
 using WebUser.features.AttributeValue.DTO;
 using WebUser.features.AttributeValue.functions;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
+using static WebUser.features.AttributeValue.functions.UpdateAttributeValue;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -22,39 +25,44 @@ public class AttributeValueController : ControllerBase
         this.mediator = mediator;
     }
 
-    [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [ProducesResponseType(typeof(AttributeValueDTO), (int)HttpStatusCode.Created)]
-    public async Task<ActionResult> Create([FromBody] CreateAttrValue.CreateAttributeValueCommand command)
-    {
-        var result = await mediator.Send(command);
-        return CreatedAtRoute("GetAttributeValueByID", new { attributeValueId = result.ID }, result);
-    }
-
-    [HttpDelete("{id:int}")]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-    public async Task<ActionResult> Delete(int id)
-    {
-        var comm = new DeleteAttrValue.DeleteAttributeValueCommand { ID = id };
-        await mediator.Send(comm);
-        return NoContent();
-    }
-
     [HttpGet]
-    [ProducesResponseType(typeof(List<AttributeValueDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+
+    [ProducesResponseType(typeof(PagedList<AttributeValueDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] AttributeValuesRequestParameters parameters)
     {
-        var comm = new GetAllAttrValues.GetAllAttrValueQuery();
+        var comm = new GetAllAttrValues.GetAllAttrValueQuery(parameters);
         var result = await mediator.Send(comm);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetAttributeValueByID")]
+    [Authorize(Roles = "Admin")]
+
     [ProducesResponseType(typeof(AttributeValueDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
     {
         var comm = new GetByIDAttributeValue.GetByIDAttrValueQuery { Id = id };
         var result = await mediator.Send(comm);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// update attribute value
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    [HttpPut("values/{id:int}")]
+    [ValidationFilter]
+    [Authorize(Roles = "Admin")]
+
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    public async Task<IActionResult> UpdateAttributeValue(int id, [FromQuery] string value)
+    {
+        var comm = new UpdateAttributeValueCommand(id, value);
+        await mediator.Send(comm);
+        return NoContent();
     }
 }

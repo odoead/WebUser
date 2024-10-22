@@ -1,30 +1,25 @@
-AttributeName 
+AttributeName +
 	добавить
 	удалить 
-	обновить
+	обновить-
 	getbyid
 	getall
-	добавить AttributeValue к AttributeName
+	создать и добавить AttributeValue к AttributeName
 	удалить AttributeValue у AttributeName
 AttributeValue
-	добавить
-	удалить 
 	обновить
 	getbyid
 	getall
 Cart
 	добавить
 	удалить 
-	обновить
 	getbyid
     getbyuserid
 	getall
 	добавить в корзину товар
-	удалить из корзины товар
+	удалить/изменить из корзины товар
 CartItem
-	getbycartid
-	getall
-	изенить количество товара
+	
 Category
 	добавить
 	удалить 
@@ -33,11 +28,10 @@ Category
 	getall
 	добавить AttributeName к Category
 	удалить AttributeName у Category
-	??показать все дочерние категории
-	??показать дочерние категории 1го порядка
+	показать все дочерние категории
+    показать дочерние категории 1го порядка
 Coupon- скидка при заказе на весь заказ
-	добавить скидку в значениях
-	добавить скидку в проценте
+	добавить
 	удалить 
 	обновить
 	getbyid
@@ -45,7 +39,6 @@ Coupon- скидка при заказе на весь заказ
 	getallbyuser
 	getallbyorder
 Discount -скидка при заказе на каждый товар отдельно  
-	обновить
 	getbyproduct
 	getall
 Image 
@@ -56,26 +49,21 @@ Order
 	getbyid
 	getbyUserid
 	getall
-		активировать купон в заказе
 OrderProduct
-	добавить 
-	удалить 
-	getbyOrder
-	getbyid
 	getall
 Point скидка при заказе на весь заказ,может иметь огрниченое время
 	добавить бонусы пользователю
-	списать бонусы у пользователя при заказе 
 	удалить 
 	getbyUser
 	getbyid
 	getall
-Promotion- скидка по определенным характеристикам(AttributeName/category/attributeValue) 
-	добавить
-	удалить 
+Promotion- скидка по определенным характеристикам(AttributeName/category/attributeValue)
+    добавить
 	обновить
+    удалить
 	getbyid
 	getall
+
 	Управление условиями применения скидки: Некоторые скидки могут иметь специальные условия, такие как минимальная сумма заказа, определенные товары в корзине и т. д. Это позволяет управлять этими условиями.
 	BuyNGetFreeX
 	BuyNGetDiscount
@@ -90,6 +78,6 @@ Product
 	добавить image
 	удалить image
 	удалить 
-	обновить
+	обновить AttributeValues
 	getbyid
 	getall

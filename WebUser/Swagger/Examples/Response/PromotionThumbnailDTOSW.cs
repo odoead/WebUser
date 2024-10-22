@@ -5,7 +5,7 @@ namespace WebUser.features.Promotion.DTO
     public class PromotionThumbnailDTOSW : IExamplesProvider<PromotionThumbnailDTO>
     {
         public PromotionThumbnailDTO GetExamples() =>
-            new PromotionThumbnailDTO
+            new()
             {
                 Name = "sale",
                 ID = 1,

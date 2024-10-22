@@ -5,10 +5,10 @@ using Swashbuckle.AspNetCore.Filters;
 public class ProductMinDTOSW : IExamplesProvider<ProductMinDTO>
 {
     public ProductMinDTO GetExamples() =>
-        new ProductMinDTO
+        new()
         {
             ID = 1,
             Name = "smartphone",
-            Price = 1000
+            Price = 1000,
         };
 }

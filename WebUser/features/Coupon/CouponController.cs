@@ -2,11 +2,13 @@ namespace WebUser.features.Coupon;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.CartItem.DTO;
 using WebUser.features.Coupon.DTO;
 using WebUser.features.Coupon.Functions;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -23,8 +25,9 @@ public class CouponController : ControllerBase
     }
 
     [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ValidationFilter]
     [ProducesResponseType(typeof(CouponDTO), (int)HttpStatusCode.OK)]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> Create([FromBody] CreateCoupon.CreateCouponCommand command)
     {
         var result = await mediator.Send(command);
@@ -32,24 +35,29 @@ public class CouponController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> Delete(int id)
     {
-        var comm = new DeleteCoupon.DeleteCouponCommand { ID = id, };
+        var comm = new DeleteCoupon.DeleteCouponCommand { ID = id };
         await mediator.Send(comm);
         return NoContent();
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<CouponDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<CouponDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] CouponRequestParameters parameters)
     {
-        var query = new GetAllCoupons.GetAllCouponAsyncQuery();
+        var query = new GetAllCoupons.GetAllCouponAsyncQuery(parameters);
+
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetCouponByID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CouponDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
     {
@@ -59,6 +67,7 @@ public class CouponController : ControllerBase
     }
 
     [HttpGet("order/{orderid:int}", Name = "GetCouponsByOrderID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CouponDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByOrderID(int orderid)
     {
@@ -67,7 +76,8 @@ public class CouponController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("order/{string:int}", Name = "GetCouponsByUserID")]
+    [HttpGet("user/{userid:int}", Name = "GetCouponsByUserID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CouponDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByUserID(string userid)
     {

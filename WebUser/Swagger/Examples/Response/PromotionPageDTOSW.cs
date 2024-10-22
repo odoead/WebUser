@@ -5,7 +5,7 @@ namespace WebUser.features.Promotion.DTO
     public class PromotionPageDTOSW : IExamplesProvider<PromotionPageDTO>
     {
         public PromotionPageDTO GetExamples() =>
-            new PromotionPageDTO
+            new()
             {
                 Name = "sale",
                 ID = 1,
@@ -14,7 +14,7 @@ namespace WebUser.features.Promotion.DTO
                 ActiveTo = DateTime.UtcNow.AddDays(50),
                 DaysLeft = 50,
                 HoursLeft = 0,
-                IsActive = false
+                IsActive = false,
             };
     }
 }

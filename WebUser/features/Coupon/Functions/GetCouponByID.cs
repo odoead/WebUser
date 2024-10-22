@@ -1,9 +1,10 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Category.Exceptions;
 using WebUser.features.Coupon.DTO;
+using WebUser.features.Product.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Coupon.Functions
 {
@@ -18,13 +19,13 @@ namespace WebUser.features.Coupon.Functions
         //handler
         public class Handler : IRequestHandler<GetCouponByIDQuery, CouponDTO>
         {
-            private readonly IMapper mapper;
+
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
             public async Task<CouponDTO> Handle(GetCouponByIDQuery request, CancellationToken cancellationToken)
@@ -32,8 +33,27 @@ namespace WebUser.features.Coupon.Functions
                 var coupon =
                     await dbcontext.Coupons.FirstOrDefaultAsync(q => q.ID == request.Id, cancellationToken: cancellationToken)
                     ?? throw new CategoryNotFoundException(request.Id);
-                var results = mapper.Map<CouponDTO>(coupon);
-                return results;
+                var couponDTO = new CouponDTO
+                {
+                    ID = coupon.ID,
+                    ActiveFrom = coupon.ActiveFrom,
+                    ActiveTo = coupon.ActiveTo,
+                    Code = coupon.Code,
+                    CreatedAt = coupon.CreatedAt,
+                    DiscountPercent = coupon.DiscountPercent,
+                    DiscountVal = coupon.DiscountVal,
+                    IsActivated = coupon.IsActivated,
+                    Product = new ProductMinDTO
+                    {
+                        ID = coupon.Product.ID,
+                        Name = coupon.Product.Name,
+                        Price = coupon.Product.Price,
+                    },
+                    IsActive = E.Coupon.IsActive(coupon),
+                    OrderID = coupon.OrderID,
+                };
+
+                return couponDTO;
             }
         }
     }

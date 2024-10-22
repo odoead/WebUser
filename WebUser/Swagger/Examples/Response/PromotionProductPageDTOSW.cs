@@ -4,5 +4,5 @@ using Swashbuckle.AspNetCore.Filters;
 
 public class PromotionProductPageDTOSW : IExamplesProvider<PromotionProductPageDTO>
 {
-    public PromotionProductPageDTO GetExamples() => new PromotionProductPageDTO { Name = "sale", Description = "buy one get two promo" };
+    public PromotionProductPageDTO GetExamples() => new() { Name = "sale", Description = "buy one get two promo" };
 }

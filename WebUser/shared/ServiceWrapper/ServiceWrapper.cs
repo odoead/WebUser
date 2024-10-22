@@ -20,7 +20,6 @@ using WebUser.features.Point;
 using WebUser.features.Point.Interfaces;
 using WebUser.features.Promotion;
 using WebUser.features.Promotion.Interfaces;
-using WebUser.features.User;
 using WebUser.features.User.Interfaces;
 using WebUser.shared.RepoWrapper;
 
@@ -53,7 +52,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (attributeNameServ == null)
+                {
                     attributeNameServ = new AttributeNameService(db);
+                }
+
                 return attributeNameServ;
             }
         }
@@ -62,7 +64,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (attributeValueServ == null)
+                {
                     attributeValueServ = new AttributeValueService(db);
+                }
+
                 return attributeValueServ;
             }
         }
@@ -71,7 +76,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (cartServ == null)
+                {
                     cartServ = new CartService(db);
+                }
+
                 return cartServ;
             }
         }
@@ -80,7 +88,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (cartItemServ == null)
+                {
                     cartItemServ = new CartItemService(db);
+                }
+
                 return cartItemServ;
             }
         }
@@ -89,7 +100,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (categoryServ == null)
+                {
                     categoryServ = new CategoryService(db);
+                }
+
                 return categoryServ;
             }
         }
@@ -98,7 +112,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (couponServ == null)
+                {
                     couponServ = new CouponService(db);
+                }
+
                 return couponServ;
             }
         }
@@ -107,7 +124,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (discountServ == null)
+                {
                     discountServ = new DiscountService(db);
+                }
+
                 return discountServ;
             }
         }
@@ -116,7 +136,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (imageServ == null)
+                {
                     imageServ = new ImageService(db);
+                }
+
                 return imageServ;
             }
         }
@@ -125,7 +148,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (orderServ == null)
+                {
                     orderServ = new OrderService(db);
+                }
+
                 return orderServ;
             }
         }
@@ -134,7 +160,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (orderProductServ == null)
+                {
                     orderProductServ = new OrderProductService(db);
+                }
+
                 return orderProductServ;
             }
         }
@@ -143,7 +172,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (pointServ == null)
+                {
                     pointServ = new PointService(db);
+                }
+
                 return pointServ;
             }
         }
@@ -152,7 +184,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (productServ == null)
+                {
                     productServ = new ProductService(db);
+                }
+
                 return productServ;
             }
         }
@@ -161,7 +196,10 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 if (promotionServ == null)
+                {
                     promotionServ = new PromotionService(db);
+                }
+
                 return promotionServ;
             }
         }
@@ -170,7 +208,7 @@ namespace WebUser.shared.ServiceWrapper
             get
             {
                 //if (userServ == null)
-                    //userServ = new UserService(db);
+                //userServ = new UserService(db);
                 return userServ;
             }
         }

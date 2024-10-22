@@ -12,9 +12,9 @@ namespace WebUser.Domain.entities
         public string Value { get; set; }
 
         [ForeignKey("AttributeNameID")]
-        public AttributeName? AttributeName { get; set; }
-        public int? AttributeNameID { get; set; }
-        public ICollection<ProductAttributeValue> Products { get; set; }
-        public ICollection<PromotionAttrValue> Promotions { get; set; }
+        public AttributeName AttributeName { get; set; }
+        public int AttributeNameID { get; set; }
+        public ICollection<ProductAttributeValue> Products { get; set; } = new List<ProductAttributeValue>();
+        public ICollection<PromotionAttrValue> Promotions { get; set; } = new List<PromotionAttrValue>();
     }
 }

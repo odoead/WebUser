@@ -11,8 +11,6 @@ namespace WebUser.shared.extentions
             application.UseExceptionHandler(options =>
                 options.Run(async context =>
                 {
-                    //internal serv error
-                    context.Response.StatusCode = 500;
                     context.Response.ContentType = "application/json";
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null)
@@ -22,7 +20,7 @@ namespace WebUser.shared.extentions
                             case BadRequestException:
                             {
                                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                               await context.Response.WriteAsync("Error ocurred: "+ contextFeature.Error);
+                                await context.Response.WriteAsync("Error ocurred: " + contextFeature.Error);
                                 break;
                             }
                             case NotFoundException:
@@ -38,7 +36,7 @@ namespace WebUser.shared.extentions
                         }
                         loggerManager.LogError($"Error!: {contextFeature.Error}");
                         await context.Response.WriteAsync(
-                            new ErrorModel() { StatusCode = context.Response.StatusCode, Message = contextFeature.Error.Message, }.ToString()
+                            new ErrorModel() { StatusCode = context.Response.StatusCode, Message = contextFeature.Error.Message }.ToString()
                         );
                     }
                 })

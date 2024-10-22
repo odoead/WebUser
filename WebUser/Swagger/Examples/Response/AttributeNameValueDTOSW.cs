@@ -6,13 +6,13 @@ using WebUser.features.AttributeName.DTO;
 public class AttributeNameValueDTOSW : IExamplesProvider<AttributeNameValueDTO>
 {
     public AttributeNameValueDTO GetExamples() =>
-        new AttributeNameValueDTO
+        new()
         {
             AttributeName = new AttributeNameMinDTO { Name = "color", ID = 1 },
             Attributes = new List<AttributeValueDTO>
             {
-                new AttributeValueDTO { ID = 1, Value = "red" },
-                new AttributeValueDTO { ID = 1, Value = "black" },
-            }
+                new() { ID = 1, Value = "red" },
+                new() { ID = 1, Value = "black" },
+            },
         };
 }

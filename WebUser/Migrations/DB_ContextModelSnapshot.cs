@@ -172,7 +172,7 @@ namespace WebUser.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("AttributeNames", (string)null);
+                    b.ToTable("AttributeNames");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.AttributeNameCategory", b =>
@@ -187,7 +187,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("CategoryID");
 
-                    b.ToTable("AttributeNameCategories", (string)null);
+                    b.ToTable("AttributeNameCategories");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.AttributeValue", b =>
@@ -198,7 +198,7 @@ namespace WebUser.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
-                    b.Property<int?>("AttributeNameID")
+                    b.Property<int>("AttributeNameID")
                         .HasColumnType("int");
 
                     b.Property<string>("Value")
@@ -209,7 +209,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("AttributeNameID");
 
-                    b.ToTable("AttributeValues", (string)null);
+                    b.ToTable("AttributeValues");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Cart", b =>
@@ -228,7 +228,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.CartItem", b =>
@@ -254,7 +254,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Category", b =>
@@ -276,7 +276,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ParentCategoryID");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Coupon", b =>
@@ -300,10 +300,10 @@ namespace WebUser.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DiscountPercent")
+                    b.Property<int?>("DiscountPercent")
                         .HasColumnType("int");
 
-                    b.Property<double>("DiscountVal")
+                    b.Property<double?>("DiscountVal")
                         .HasColumnType("float");
 
                     b.Property<bool>("IsActivated")
@@ -326,7 +326,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("Coupons", (string)null);
+                    b.ToTable("Coupons");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Discount", b =>
@@ -346,10 +346,10 @@ namespace WebUser.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DiscountPercent")
+                    b.Property<int?>("DiscountPercent")
                         .HasColumnType("int");
 
-                    b.Property<double>("DiscountVal")
+                    b.Property<double?>("DiscountVal")
                         .HasColumnType("float");
 
                     b.Property<int>("ProductID")
@@ -359,7 +359,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("Discounts", (string)null);
+                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Image", b =>
@@ -374,19 +374,18 @@ namespace WebUser.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("ProductID")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("ProductID");
 
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Img", (string)null);
+                    b.ToTable("Img");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Order", b =>
@@ -413,7 +412,7 @@ namespace WebUser.Migrations
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
-                    b.Property<int>("PointsUsed")
+                    b.Property<int?>("PointsUsed")
                         .HasColumnType("int");
 
                     b.Property<bool>("Status")
@@ -427,7 +426,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.OrderProduct", b =>
@@ -456,7 +455,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OrderProducts", (string)null);
+                    b.ToTable("OrderProducts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Point", b =>
@@ -498,7 +497,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Points", (string)null);
+                    b.ToTable("Points");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Product", b =>
@@ -531,7 +530,7 @@ namespace WebUser.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.ProductAttributeValue", b =>
@@ -546,7 +545,22 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductAttributeValues", (string)null);
+                    b.ToTable("ProductAttributeValues");
+                });
+
+            modelBuilder.Entity("WebUser.Domain.entities.ProductUserNotificationRequest", b =>
+                {
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ProductID", "UserID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("RequestNotifications");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Promotion", b =>
@@ -563,7 +577,7 @@ namespace WebUser.Migrations
                     b.Property<DateTime>("ActiveTo")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("BuyQuantity")
+                    b.Property<int?>("BuyQuantity")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -573,37 +587,37 @@ namespace WebUser.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DiscountPercent")
+                    b.Property<int?>("DiscountPercent")
                         .HasColumnType("int");
 
-                    b.Property<double>("DiscountVal")
+                    b.Property<double?>("DiscountVal")
                         .HasColumnType("float");
 
-                    b.Property<int>("GetQuantity")
+                    b.Property<int?>("GetQuantity")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsFirstOrder")
+                    b.Property<bool?>("IsFirstOrder")
                         .HasColumnType("bit");
 
-                    b.Property<double>("MinPay")
+                    b.Property<double?>("MinPay")
                         .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PointsExpireDays")
+                    b.Property<int?>("PointsExpireDays")
                         .HasColumnType("int");
 
-                    b.Property<int>("PointsPercent")
+                    b.Property<int?>("PointsPercent")
                         .HasColumnType("int");
 
-                    b.Property<int>("PointsValue")
+                    b.Property<int?>("PointsValue")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
 
-                    b.ToTable("Promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.PromotionAttrValue", b =>
@@ -618,7 +632,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("AttributeValueID");
 
-                    b.ToTable("PromotionAttributeValues", (string)null);
+                    b.ToTable("PromotionAttributeValues");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.PromotionCategory", b =>
@@ -633,7 +647,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("CategoryID");
 
-                    b.ToTable("PromotionCategories", (string)null);
+                    b.ToTable("PromotionCategories");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.PromotionProduct", b =>
@@ -648,7 +662,7 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("PromotionProducts", (string)null);
+                    b.ToTable("PromotionProducts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.PromotionPromProduct", b =>
@@ -663,7 +677,45 @@ namespace WebUser.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("PromotionPromProducts", (string)null);
+                    b.ToTable("PromotionPromProducts");
+                });
+
+            modelBuilder.Entity("WebUser.Domain.entities.Review", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Header")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ProductID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("ProductReviews");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.User", b =>
@@ -722,10 +774,9 @@ namespace WebUser.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RefreshTokenExpireDate")
+                    b.Property<DateTime?>("RefreshTokenExpireDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
@@ -825,7 +876,9 @@ namespace WebUser.Migrations
                 {
                     b.HasOne("WebUser.Domain.entities.AttributeName", "AttributeName")
                         .WithMany("AttributeValues")
-                        .HasForeignKey("AttributeNameID");
+                        .HasForeignKey("AttributeNameID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AttributeName");
                 });
@@ -872,7 +925,7 @@ namespace WebUser.Migrations
             modelBuilder.Entity("WebUser.Domain.entities.Coupon", b =>
                 {
                     b.HasOne("WebUser.Domain.entities.Order", "Order")
-                        .WithMany("ActivatedCoupons")
+                        .WithMany()
                         .HasForeignKey("OrderID");
 
                     b.HasOne("WebUser.Domain.entities.OrderProduct", null)
@@ -907,13 +960,7 @@ namespace WebUser.Migrations
                         .WithMany("Images")
                         .HasForeignKey("ProductID");
 
-                    b.HasOne("WebUser.Domain.entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-
                     b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Order", b =>
@@ -982,6 +1029,25 @@ namespace WebUser.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("WebUser.Domain.entities.ProductUserNotificationRequest", b =>
+                {
+                    b.HasOne("WebUser.Domain.entities.Product", "Product")
+                        .WithMany("RequestNotifications")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebUser.Domain.entities.User", "User")
+                        .WithMany("RequestNotifications")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WebUser.Domain.entities.PromotionAttrValue", b =>
                 {
                     b.HasOne("WebUser.Domain.entities.AttributeValue", "AttributeValue")
@@ -1048,7 +1114,7 @@ namespace WebUser.Migrations
                         .IsRequired();
 
                     b.HasOne("WebUser.Domain.entities.Promotion", "Promotion")
-                        .WithMany("PromoProducts")
+                        .WithMany("PromProducts")
                         .HasForeignKey("PromotionID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1056,6 +1122,25 @@ namespace WebUser.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("WebUser.Domain.entities.Review", b =>
+                {
+                    b.HasOne("WebUser.Domain.entities.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebUser.Domain.entities.User", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.AttributeName", b =>
@@ -1088,8 +1173,6 @@ namespace WebUser.Migrations
 
             modelBuilder.Entity("WebUser.Domain.entities.Order", b =>
                 {
-                    b.Navigation("ActivatedCoupons");
-
                     b.Navigation("OrderProduct");
 
                     b.Navigation("Points");
@@ -1117,6 +1200,10 @@ namespace WebUser.Migrations
                     b.Navigation("PromoPromotions");
 
                     b.Navigation("Promotions");
+
+                    b.Navigation("RequestNotifications");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.Promotion", b =>
@@ -1127,7 +1214,7 @@ namespace WebUser.Migrations
 
                     b.Navigation("Products");
 
-                    b.Navigation("PromoProducts");
+                    b.Navigation("PromProducts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.User", b =>
@@ -1135,6 +1222,10 @@ namespace WebUser.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Points");
+
+                    b.Navigation("RequestNotifications");
+
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

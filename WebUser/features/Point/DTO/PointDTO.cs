@@ -11,6 +11,6 @@ namespace WebUser.features.Point.DTO
         public DateTime CreateDate { get; set; }
         public DateTime ExpireDate { get; set; }
         public string UserID { get; set; }
-        public int? OrderID { get; set; } = null;
+        public int? OrderID { get; set; }
     }
 }

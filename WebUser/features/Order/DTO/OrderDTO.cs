@@ -1,4 +1,3 @@
-using WebUser.features.Coupon.DTO;
 using WebUser.features.OrderProduct.DTO;
 using WebUser.features.Point.DTO;
 
@@ -13,10 +12,9 @@ namespace WebUser.features.Order.DTO
         public bool Status { get; set; }
         public double Payment { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<CouponMinDTO>? ActivatedCoupons { get; set; } = new List<CouponMinDTO>();
         public List<PointMinDTO>? ActivatedPoints { get; set; } = new List<PointMinDTO>();
         public List<OrderProductDTO> OrderProducts { get; set; }
         public string UserID { get; set; }
-        public int? PointsUsed { get; set; } = null;
+        public int? PointsUsed { get; set; }
     }
 }

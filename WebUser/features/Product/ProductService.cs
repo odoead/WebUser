@@ -1,16 +1,17 @@
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Cart.Interfaces;
-using WebUser.shared.Email;
 
 namespace WebUser.features.Cart
 {
     public class ProductService : IProductService
     {
         private readonly DB_Context dbcontext;
+
         //private readonly EmailService emailService;
 
-        public ProductService(DB_Context context/*, EmailService emailService*/)
+        public ProductService(
+            DB_Context context /*, EmailService emailService*/
+        )
         {
             dbcontext = context;
             //this.emailService = emailService;

@@ -21,8 +21,5 @@ namespace WebUser.features.Product.DTO
         public List<DiscountMinDTO> Discounts { get; set; }
         public List<CouponMinDTO> Coupons { get; set; }
         public List<PromotionMinDTO> Promotions { get; set; }
-        //public ICollection<E.OrderProduct> OrderProduct { get; set; }
-        //public ICollection<E.Product> PromotionProducts { get; set; }
-        // public ICollection<E.CartItem> CartItems { get; set; }
     }
 }

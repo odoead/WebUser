@@ -1,11 +1,16 @@
 namespace WebUser.features.User;
 
+using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebUser.features.User.DTO;
 using WebUser.shared.RepoWrapper;
 
 [ApiController]
 [Route("api/[controller]")]
+[ProducesResponseType(typeof(BadRequestResult), (int)HttpStatusCode.BadRequest)]
+[ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 public class TokenController : ControllerBase
 {
     private readonly IServiceWrapper service;
@@ -15,11 +20,20 @@ public class TokenController : ControllerBase
         this.service = service;
     }
 
-
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] TokenDTO tokenDTO)
+    [Authorize]
+    [ProducesResponseType(typeof(TokenDTO), 200)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+    public async Task<ActionResult> RefreshToken([FromBody] TokenDTO tokenDto)
     {
-        var tokenRes = await service.User.RefreshToken(tokenDTO);
-        return Ok(tokenRes);
+        try
+        {
+            var newTokenDto = await service.User.RefreshToken(tokenDto);
+            return Ok(newTokenDto);
+        }
+        catch (Exception)
+        {
+            return Unauthorized();
+        }
     }
 }

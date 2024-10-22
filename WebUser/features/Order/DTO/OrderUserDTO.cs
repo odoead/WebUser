@@ -11,6 +11,6 @@ public class OrderUserDTO
     public bool Status { get; set; }
     public double Payment { get; set; }
     public DateTime CreatedAt { get; set; }
-    public int? PointsUsed { get; set; } = null;
+    public int? PointsUsed { get; set; }
     public List<OrderProductDTO> OrderProducts { get; set; }
 }

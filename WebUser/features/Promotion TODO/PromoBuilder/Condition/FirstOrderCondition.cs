@@ -1,4 +1,4 @@
-﻿using E = WebUser.Domain.entities;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Promotion.PromoBuilder.Condition
 {
@@ -14,6 +14,13 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
         {
             var specification = new FirstOrderCondition();
             bool result = specification.ApplyRule(cart);
+            return result;
+        }
+
+        public static bool IsFirstOrder(this IQueryable<E.Cart> carts)
+        {
+            var specification = new FirstOrderCondition();
+            bool result = specification.ApplyRule(carts.FirstOrDefault());
             return result;
         }
 

@@ -6,7 +6,6 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
     {
         public ProductsCondition(IEnumerable<E.Product> products)
             : base(q => q.Items.Select(i => i.Product).Intersect(products).Any())
-        /*(q => q.items.Any(i=>products.Contains( i.Product)))*/
         { }
     }
 
@@ -19,7 +18,14 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
             return result;
         }
 
-        public static IQueryable<E.Cart> HasProducts(IQueryable<E.Cart> carts, IEnumerable<E.Product> products)
+        public static bool HasProducts(this IQueryable<E.Cart> carts, IEnumerable<E.Product> products)
+        {
+            var specification = new ProductsCondition(products);
+            bool result = specification.ApplyRule(carts.FirstOrDefault());
+            return result;
+        }
+
+        public static IQueryable<E.Cart> HasProducts(IQueryable<E.Cart> carts, IQueryable<E.Product> products)
         {
             var specification = new ProductsCondition(products);
             return carts.Where(specification.Expression);

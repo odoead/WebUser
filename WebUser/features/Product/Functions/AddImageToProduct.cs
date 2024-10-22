@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -21,12 +20,12 @@ namespace WebUser.features.Product.Functions
         public class Handler : IRequestHandler<AddImageToProductCommand, ImageDTO>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(DB_Context context, IMapper mapper)
+
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
             public async Task<ImageDTO> Handle(AddImageToProductCommand request, CancellationToken cancellationToken)
@@ -37,16 +36,14 @@ namespace WebUser.features.Product.Functions
                     using (var memoryStream = new MemoryStream())
                     {
                         await request.File.CopyToAsync(memoryStream, cancellationToken);
-                        //based on the upload file to create Photo instance.
-                        //You can also check the database, whether the image exists in the database.
-                        var image = new E.Image() { ImageContent = memoryStream.ToArray(), Product = product, };
+                        var image = new E.Image() { ImageContent = memoryStream.ToArray(), Product = product, ProductID = request.ProductId };
                         await dbcontext.Img.AddAsync(image, cancellationToken);
                         await dbcontext.SaveChangesAsync(cancellationToken);
-                        var results = mapper.Map<ImageDTO>(image);
+                        var results = new ImageDTO { ID = image.ID, ImageContent = image.ImageContent };
                         return results;
                     }
                 }
-                throw new NotImplementedException();
+                throw new ArgumentNullException("Image file is empty");
             }
         }
     }

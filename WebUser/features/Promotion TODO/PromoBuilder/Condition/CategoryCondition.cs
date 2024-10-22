@@ -10,7 +10,6 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
                     .Intersect(categories.SelectMany(w => w.Attributes.SelectMany(e => e.AttributeName.AttributeValues)))
                     .Any()
             )
-        //(q => q.items.Any(item => item.Product.AttributeValues.Any(attr => categories.Contains(attr.AttributeName.Category))))
         { }
     }
 
@@ -23,7 +22,14 @@ namespace WebUser.features.Promotion.PromoBuilder.Condition
             return result;
         }
 
-        public static IQueryable<E.Cart> HasCategories(IQueryable<E.Cart> carts, IEnumerable<E.Category> categories)
+        public static bool HasCategories(this IQueryable<E.Cart> carts, IEnumerable<E.Category> categories)
+        {
+            var specification = new CategoryCondition(categories);
+            bool result = specification.ApplyRule(carts.FirstOrDefault());
+            return result;
+        }
+
+        public static IQueryable<E.Cart> HasCategories(IQueryable<E.Cart> carts, IQueryable<E.Category> categories)
         {
             var specification = new CategoryCondition(categories);
             return carts.Where(specification.Expression);

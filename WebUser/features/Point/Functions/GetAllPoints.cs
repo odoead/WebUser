@@ -1,8 +1,6 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.features.AttributeName.DTO;
 using WebUser.features.Point.DTO;
 using WebUser.shared.RequestForming.features;
 
@@ -11,28 +9,57 @@ namespace WebUser.features.Point.Functions
     public class GetAllPoints
     {
         //input
-        public class GetAllPointsQuery : IRequest<ICollection<PointDTO>>
+        public class GetAllPointsQuery : IRequest<PagedList<PointDTO>>
         {
-            public RequestParameters Parameters { get; set; }
+            public PointRequestParameters Parameters { get; set; }
+
+            public GetAllPointsQuery(PointRequestParameters parameters)
+            {
+                Parameters = parameters;
+            }
         }
 
         //handler
-        public class Handler : IRequestHandler<GetAllPointsQuery, ICollection<PointDTO>>
+        public class Handler : IRequestHandler<GetAllPointsQuery, PagedList<PointDTO>>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
-            public async Task<ICollection<PointDTO>> Handle(GetAllPointsQuery request, CancellationToken cancellationToken)
+            public async Task<PagedList<PointDTO>> Handle(GetAllPointsQuery request, CancellationToken cancellationToken)
             {
-                var points = await dbcontext.Points.ToListAsync(cancellationToken: cancellationToken);
-                var results = mapper.Map<ICollection<PointDTO>>(points);
-                return PagedList<PointDTO>.PaginateList(results, results.Count, request.Parameters.PageNum, request.Parameters.PageSize);
+                var data = dbcontext.Points.AsQueryable();
+                var srcPoints = await data.Skip((request.Parameters.PageNumber - 1) * request.Parameters.PageSize)
+                    .Take(request.Parameters.PageSize)
+                    .ToListAsync(cancellationToken);
+
+                var dtoPoints = srcPoints
+                    .Select(point => new PointDTO
+                    {
+                        ID = point.ID,
+                        Value = point.Value,
+                        BalanceLeft = point.BalanceLeft,
+                        isExpirable = point.IsExpirable,
+                        IsUsed = point.IsUsed,
+                        IsActive = point.IsUsed,
+                        CreateDate = point.CreateDate,
+                        ExpireDate = point.ExpireDate,
+                        UserID = point.UserID,
+                        OrderID = point.OrderID,
+                    })
+                    .ToList();
+
+                var pagedList = PagedList<PointDTO>.PaginateList(
+                    source: dtoPoints,
+                    totalCount: await data.CountAsync(cancellationToken: cancellationToken),
+                    pageNumber: request.Parameters.PageNumber,
+                    pageSize: request.Parameters.PageSize
+                );
+
+                return pagedList;
             }
         }
     }

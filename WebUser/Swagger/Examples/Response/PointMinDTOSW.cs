@@ -5,12 +5,12 @@ using Swashbuckle.AspNetCore.Filters;
 public class PointMinDTOSW : IExamplesProvider<PointMinDTO>
 {
     public PointMinDTO GetExamples() =>
-        new PointMinDTO
+        new()
         {
             ID = 1,
             BalanceLeft = 100,
             IsActive = true,
             IsUsed = false,
-            Value = 100
+            Value = 100,
         };
 }

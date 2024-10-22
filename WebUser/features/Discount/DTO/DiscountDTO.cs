@@ -10,7 +10,7 @@ namespace WebUser.features.discount.DTO
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveTo { get; set; }
         public bool IsActive { get; set; }
-        public double DiscountVal { get; set; }
-        public float DiscountPercent { get; set; }
+        public double? DiscountVal { get; set; }
+        public float? DiscountPercent { get; set; }
     }
 }

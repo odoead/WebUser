@@ -1,8 +1,8 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Coupon.DTO;
+using WebUser.features.Product.DTO;
 using WebUser.features.Product.Exceptions;
 using WebUser.shared;
 using E = WebUser.Domain.entities;
@@ -16,21 +16,19 @@ namespace WebUser.features.Coupon.Functions
         {
             public DateTime ActiveFrom { get; set; }
             public DateTime ActiveTo { get; set; }
-            public double? DiscountVal { get; set; }
-            public int DiscountPercent { get; set; }
+            public double DiscountVal { get; set; }
+            public int? DiscountPercent { get; set; }
             public int ProductId { get; set; }
         }
 
         //handler
         public class Handler : IRequestHandler<CreateCouponCommand, CouponDTO>
         {
-            private readonly IMapper mapper;
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
             public async Task<CouponDTO> Handle(CreateCouponCommand request, CancellationToken cancellationToken)
@@ -46,33 +44,32 @@ namespace WebUser.features.Coupon.Functions
                     CreatedAt = DateTime.UtcNow,
                     IsActivated = false,
                     Product = product,
+                    DiscountVal = request.DiscountVal > 0 ? (double)request.DiscountVal : 0,
+                    DiscountPercent = request.DiscountPercent > 0 ? request.DiscountPercent : 0,
                 };
-                if (request.DiscountVal > 0)
+
+                await dbcontext.Coupons.AddAsync(coupon, cancellationToken);
+                await dbcontext.SaveChangesAsync(cancellationToken);
+
+                var results = new CouponDTO
                 {
-                    coupon.DiscountVal = (double)request.DiscountVal;
-                }
-                if (request.DiscountPercent > 0)
-                {
-                    coupon.DiscountPercent = request.DiscountPercent;
-                }
-                if (
-                    !await dbcontext.Coupons.AnyAsync(
-                        q =>
-                            q.ActiveFrom == coupon.ActiveFrom
-                            && q.ActiveTo == coupon.ActiveTo
-                            && q.DiscountVal == coupon.DiscountVal
-                            && q.DiscountPercent == coupon.DiscountPercent
-                            && q.Code == coupon.Code
-                            && q.CreatedAt == coupon.CreatedAt
-                            && q.IsActivated == coupon.IsActivated,
-                        cancellationToken: cancellationToken
-                    )
-                )
-                {
-                    await dbcontext.Coupons.AddAsync(coupon, cancellationToken);
-                    await dbcontext.SaveChangesAsync(cancellationToken);
-                }
-                var results = mapper.Map<CouponDTO>(coupon);
+                    ID = coupon.ID,
+                    ActiveFrom = coupon.ActiveFrom,
+                    ActiveTo = coupon.ActiveTo,
+                    Code = coupon.Code,
+                    CreatedAt = coupon.CreatedAt,
+                    DiscountPercent = coupon.DiscountPercent,
+                    DiscountVal = coupon.DiscountVal,
+                    IsActivated = coupon.IsActivated,
+                    Product = new ProductMinDTO
+                    {
+                        ID = coupon.Product.ID,
+                        Name = coupon.Product.Name,
+                        Price = coupon.Product.Price,
+                    },
+                    IsActive = E.Coupon.IsActive(coupon),
+                    OrderID = null,
+                };
                 return results;
             }
         }

@@ -1,10 +1,11 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Category.Exceptions;
 using WebUser.features.Coupon.DTO;
 using WebUser.features.Order.Exceptions;
+using WebUser.features.Product.DTO;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Coupon.Functions
 {
@@ -19,25 +20,54 @@ namespace WebUser.features.Coupon.Functions
         //handler
         public class Handler : IRequestHandler<GetCouponByUserIDQuery, ICollection<CouponDTO>>
         {
-            private readonly IMapper mapper;
+
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
             public async Task<ICollection<CouponDTO>> Handle(GetCouponByUserIDQuery request, CancellationToken cancellationToken)
             {
                 if (await dbcontext.Orders.AnyAsync(q => q.UserID == request.UserId, cancellationToken: cancellationToken))
+                {
                     throw new OrderNotFoundException(-1);
-                // throw new userNotFoundException(request.UserId);
+                }
+
                 var coupons =
-                    await dbcontext.Coupons.Where(q => q.Order.UserID == request.UserId).ToListAsync(cancellationToken: cancellationToken)
-                    ?? throw new CategoryNotFoundException(-1);
-                var results = mapper.Map<ICollection<CouponDTO>>(coupons);
-                return results;
+                    await dbcontext
+                        .Coupons.Include(q => q.Order)
+                        .Where(q => q.Order.UserID == request.UserId)
+                        .ToListAsync(cancellationToken: cancellationToken) ?? throw new CategoryNotFoundException(-1);
+
+                var couponDTOs = new List<CouponDTO>();
+                foreach (var coupon in coupons)
+                {
+                    var couponDTO = new CouponDTO
+                    {
+                        ID = coupon.ID,
+                        ActiveFrom = coupon.ActiveFrom,
+                        ActiveTo = coupon.ActiveTo,
+                        Code = coupon.Code,
+                        CreatedAt = coupon.CreatedAt,
+                        DiscountPercent = coupon.DiscountPercent,
+                        DiscountVal = coupon.DiscountVal,
+                        IsActivated = coupon.IsActivated,
+                        Product = new ProductMinDTO
+                        {
+                            ID = coupon.Product.ID,
+                            Name = coupon.Product.Name,
+                            Price = coupon.Product.Price,
+                        },
+                        IsActive = E.Coupon.IsActive(coupon),
+                        OrderID = coupon.OrderID,
+                    };
+                    couponDTOs.Add(couponDTO);
+                }
+
+                return couponDTOs;
             }
         }
     }

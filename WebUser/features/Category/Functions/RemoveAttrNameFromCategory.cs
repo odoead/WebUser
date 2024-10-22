@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.Domain.entities;
 using WebUser.features.AttributeName.Exceptions;
 using WebUser.features.Category.Exceptions;
 
@@ -27,16 +26,18 @@ namespace WebUser.features.Category.Functions
             public async Task Handle(RemoveAttrNameFromCategoryCommand request, CancellationToken cancellationToken)
             {
                 var category =
-                    await dbcontext.Categories.Where(q => q.ID == request.CategoryId).FirstOrDefaultAsync(cancellationToken: cancellationToken)
-                    ?? throw new CategoryNotFoundException(request.CategoryId);
-                var attrName =
                     await dbcontext
-                        .AttributeNames.Where(q => q.ID == request.AttributeNameID)
+                        .Categories.Include(q => q.Attributes)
+                        .Where(q => q.ID == request.CategoryId)
+                        .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? throw new CategoryNotFoundException(request.CategoryId);
+                var attrName = await dbcontext.AttributeNames.Where(q => q.ID == request.AttributeNameID)
                         .FirstOrDefaultAsync(cancellationToken: cancellationToken)
                     ?? throw new AttributeNameNotFoundException(request.AttributeNameID);
-                if (category.Attributes.Select(q => q.AttributeName).Contains(attrName))
+
+                var attributeNameCategory = category.Attributes.FirstOrDefault(q => q.AttributeNameID == attrName.ID);
+                if (category.Attributes.Select(q => q.AttributeNameID).Contains(attrName.ID))
                 {
-                    category.Attributes.Remove(new AttributeNameCategory { AttributeName = attrName, Category = category });
+                    category.Attributes.Remove(attributeNameCategory);
                     await dbcontext.SaveChangesAsync(cancellationToken);
                 }
             }

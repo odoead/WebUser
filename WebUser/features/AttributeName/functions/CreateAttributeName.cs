@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -19,30 +18,42 @@ namespace WebUser.features.AttributeName.functions
         //handler
         public class Handler : IRequestHandler<CreateAttributeNameCommand, AttributeNameDTO>
         {
-            private readonly IMapper mapper;
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
             public async Task<AttributeNameDTO> Handle(CreateAttributeNameCommand request, CancellationToken cancellationToken)
             {
-                var attributeName = new E.AttributeName { Name = request.Name, Description = request.Description, };
-                if (
-                    !await dbcontext.AttributeNames.AnyAsync(
-                        q => q.Name == request.Name && q.Description == request.Description,
-                        cancellationToken: cancellationToken
-                    )
-                )
+                var existingAttribute = await dbcontext.AttributeNames.FirstOrDefaultAsync(
+                    q => q.Name == request.Name && q.Description == request.Description,
+                    cancellationToken
+                );
+
+                if (existingAttribute != null)
                 {
-                    await dbcontext.AttributeNames.AddAsync(attributeName, cancellationToken);
-                    await dbcontext.SaveChangesAsync(cancellationToken);
+                    return new AttributeNameDTO
+                    {
+                        Description = existingAttribute.Description,
+                        Id = existingAttribute.ID,
+                        Name = existingAttribute.Name,
+                        AttributeValues = new(),
+                    };
                 }
-                var results = mapper.Map<AttributeNameDTO>(attributeName);
-                return results;
+
+                var attributeName = new E.AttributeName { Name = request.Name, Description = request.Description };
+
+                await dbcontext.AttributeNames.AddAsync(attributeName, cancellationToken);
+                await dbcontext.SaveChangesAsync(cancellationToken);
+                return new AttributeNameDTO
+                {
+                    Description = attributeName.Description,
+                    Id = attributeName.ID,
+                    Name = attributeName.Name,
+                    AttributeValues = new(),
+                };
             }
         }
     }

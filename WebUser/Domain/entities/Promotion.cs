@@ -20,31 +20,38 @@ namespace WebUser.Domain.entities
 
         //conditions
         [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public double MinPay { get; set; }
+        public double? MinPay { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public int BuyQuantity { get; set; }
-        public bool IsFirstOrder { get; set; }
-        public ICollection<PromotionCategory> Categories { get; set; }
-        public ICollection<PromotionProduct> Products { get; set; }
-        public ICollection<PromotionAttrValue> AttributeValues { get; set; }
+        public int? BuyQuantity { get; set; }
+        public bool? IsFirstOrder { get; set; }
+        public ICollection<PromotionCategory> Categories { get; set; } = new List<PromotionCategory>();
+        public ICollection<PromotionProduct> Products { get; set; } = new List<PromotionProduct>();
+        public ICollection<PromotionAttrValue> AttributeValues { get; set; } = new List<PromotionAttrValue>();
 
         //actions
         [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public double DiscountVal { get; set; }
+        public double? DiscountVal { get; set; }
 
         [Range(1, 100, ErrorMessage = "Only 1-100 range allowed")]
-        public int DiscountPercent { get; set; }
+        public int? DiscountPercent { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public int GetQuantity { get; set; }
+        public int? GetQuantity { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
-        public int PointsValue { get; set; }
+        public int? PointsValue { get; set; }
 
         [Range(1, 100, ErrorMessage = "Only 1-100 range allowed")]
-        public int PointsPercent { get; set; }
-        public int PointsExpireDays { get; set; }
-        public ICollection<PromotionPromProduct> PromoProducts { get; set; }
+        public int? PointsPercent { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
+        public int? PointsExpireDays { get; set; }
+        public ICollection<PromotionPromProduct> PromProducts { get; set; } = new List<PromotionPromProduct>();
+        public static bool IsActive(Promotion promotion)
+        {
+            var isValid = Promotion.IsActive(promotion);
+            return isValid;
+        }
     }
 }

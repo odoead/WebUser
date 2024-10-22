@@ -6,10 +6,12 @@ namespace WebUser.features.Product.extensions
 {
     public static class ProductReqestFormer
     {
-        //pattern:
-        //category0/category1/category1.2/attributeName1=attributeValueName1,attributeValueName2&attributeName3=attributeValueName6,attributeValueName7&range=100-200
-        //page
-        //ordrby
+        /// <summary>
+        /// sorts products by an orderBy. OrderBy accept ProductOrderBy enum params
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
         public static IQueryable<E.Product> Sort(this IQueryable<E.Product> query, string orderBy)
         {
             ProductOrderBy tryParseResult;
@@ -34,26 +36,42 @@ namespace WebUser.features.Product.extensions
             return query;
         }
 
+        /// <summary>
+        /// searches for products, which name contains every requested word in the requestName string(words splits automatically)
+        /// </summary>
+        /// <param name="products"></param>
+        /// <param name="requestName"></param>
+        /// <returns></returns>
         public static IQueryable<E.Product> SearchByName(this IQueryable<E.Product> products, string? requestName)
         {
             char[] splitChars = { ' ', ',', ';', '-', '_', '.', ':', '\t' };
             List<string> input = requestName.ToLower().Split(splitChars).ToList();
             return string.IsNullOrEmpty(requestName)
                 ? products
-                : products.Where(q => q.Name != null && input.All(item => q.Name.ToLower().Contains(item)));
+                : products.Where((q) => q.Name != null && input.All(item => q.Name.ToLower().Contains(item)));
         }
 
+        /// <summary>
+        /// filter products by attributeValue Id's
+        /// </summary>
+        /// <param name="products"></param>
+        /// <param name="attributeValueIDs"></param>
+        /// <param name="minPrice"></param>
+        /// <param name="maxPrice"></param>
+        /// <returns></returns>
         public static IQueryable<E.Product> Filter(
             this IQueryable<E.Product> products,
             List<int> attributeValueIDs,
             int minPrice = 0,
             int maxPrice = int.MaxValue
         ) =>
-            products.Where(q =>
-                attributeValueIDs.All(id => q.AttributeValues.Select(p => p.AttributeValueID).Contains(id))
-                && q.Price >= minPrice
-                && q.Price <= maxPrice
-            );
+            attributeValueIDs.Count > 0
+                ? products.Where(q =>
+                    attributeValueIDs.All(id => q.AttributeValues.Select(p => p.AttributeValueID).Contains(id))
+                    && q.Price >= minPrice
+                    && q.Price <= maxPrice
+                )
+                : products.Where(q => q.Price >= minPrice && q.Price <= maxPrice);
         /*public static IQueryable<E.Product> FilterByAttributeValues(IQueryable<E.Product> query, string request)
         {
             var categories = request.Split('/').ToList();

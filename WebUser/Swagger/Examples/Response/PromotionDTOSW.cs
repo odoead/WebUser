@@ -7,7 +7,7 @@ namespace WebUser.features.Promotion.DTO
     public class PromotionDTOSW : IExamplesProvider<PromotionDTO>
     {
         public PromotionDTO GetExamples() =>
-            new PromotionDTO
+            new()
             {
                 ID = 1,
                 IsActive = true,
@@ -24,42 +24,42 @@ namespace WebUser.features.Promotion.DTO
                 PointsExpireDays = 90,
                 PromoProducts = new List<ProductMinDTO>
                 {
-                    new ProductMinDTO
+                    new()
                     {
                         ID = 1,
                         Name = "Product1",
-                        Price = 10.0
+                        Price = 10.0,
                     },
-                    new ProductMinDTO
+                    new()
                     {
                         ID = 2,
                         Name = "Product2",
-                        Price = 20.0
-                    }
+                        Price = 20.0,
+                    },
                 },
                 MinPay = 50.0,
                 BuyQuantity = 3,
                 IsFirstOrder = false,
                 Categories = new List<CategoryMinDTO>
                 {
-                    new CategoryMinDTO { ID = 1, Name = "height" },
-                    new CategoryMinDTO { ID = 2, Name = "width" }
+                    new() { ID = 1, Name = "height" },
+                    new() { ID = 2, Name = "width" },
                 },
                 Products = new List<ProductMinDTO>
                 {
-                    new ProductMinDTO
+                    new()
                     {
                         ID = 1,
                         Name = "Product1",
-                        Price = 10.0
+                        Price = 10.0,
                     },
-                    new ProductMinDTO
+                    new()
                     {
                         ID = 2,
                         Name = "Product2",
-                        Price = 20.0
-                    }
-                }
+                        Price = 20.0,
+                    },
+                },
             };
     }
 }

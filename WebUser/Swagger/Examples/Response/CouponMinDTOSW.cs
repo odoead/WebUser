@@ -5,11 +5,11 @@ using Swashbuckle.AspNetCore.Filters;
 public class CouponMinDTOSW : IExamplesProvider<CouponMinDTO>
 {
     public CouponMinDTO GetExamples() =>
-        new CouponMinDTO
+        new()
         {
             ID = 3,
             IsActive = true,
             DiscountPercent = 50,
-            DiscountVal = 0
+            DiscountVal = 0,
         };
 }

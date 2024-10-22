@@ -1,9 +1,8 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.AttributeValue.DTO;
-using WebUser.features.Category.Exceptions;
+using WebUser.features.AttributeValue.Exceptions;
 
 namespace WebUser.features.AttributeValue.functions
 {
@@ -18,21 +17,22 @@ namespace WebUser.features.AttributeValue.functions
         //handler
         public class Handler : IRequestHandler<GetByIDAttrValueQuery, AttributeValueDTO>
         {
-            private readonly IMapper mapper;
+
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
             public async Task<AttributeValueDTO> Handle(GetByIDAttrValueQuery request, CancellationToken cancellationToken)
             {
-                var name =
+                var value =
                     await dbcontext.AttributeValues.FirstOrDefaultAsync(q => q.ID == request.Id, cancellationToken: cancellationToken)
-                    ?? throw new CategoryNotFoundException(request.Id);
-                var results = mapper.Map<AttributeValueDTO>(name);
+                    ?? throw new AttributeValueNotFoundException(request.Id);
+                var results = new AttributeValueDTO { ID = value.ID, Value = value.Value };
+
                 return results;
             }
         }

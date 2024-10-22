@@ -2,11 +2,13 @@ namespace WebUser.features.Order;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.Image.DTO;
 using WebUser.features.Order.DTO;
 using WebUser.features.Order.Functions;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -23,8 +25,9 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ValidationFilter]
     [ProducesResponseType(typeof(OrderDTO), (int)HttpStatusCode.Created)]
+    [Authorize]
     public async Task<ActionResult> Create([FromBody] CreateOrder.CreateOrderCommand command)
     {
         var result = await mediator.Send(command);
@@ -32,16 +35,19 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<OrderDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<OrderDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] OrderRequestParameters parameters)
     {
-        var query = new GetAllOrders.GetAllOrdersAsyncQuery();
+        var query = new GetAllOrders.GetAllOrdersAsyncQuery(parameters);
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetOrderByID")]
-    [ProducesResponseType(typeof(List<OrderDTO>), (int)HttpStatusCode.OK)]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(OrderDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
     {
         var query = new GetOrderByID.GetByIDQuery { Id = id };
@@ -49,7 +55,8 @@ public class OrderController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("order/{string:int}", Name = "GetOrderByUserID")]
+    [HttpGet("user/{userid}", Name = "GetOrdersByUserID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<OrderDTO>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByUserID(string userid)
     {

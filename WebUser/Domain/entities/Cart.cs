@@ -7,7 +7,7 @@ namespace WebUser.Domain.entities
     {
         [Key]
         public int ID { get; set; }
-        public ICollection<CartItem>? Items { get; set; } = new List<CartItem>();
+        public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
 
         [ForeignKey("UserID")]
         public User User { get; set; }

@@ -16,6 +16,9 @@ namespace WebUser.features.OrderProduct.Interfaces
         /// </summary>
         /// <param name="cartItemDiscounts"></param>
         /// <returns></returns>
-        public ICollection<E.OrderProduct> CreateOrderProdsFromCartItemsDiscounts(List<(E.CartItem items, double discount)> cartItemDiscounts);
+        public ICollection<E.OrderProduct> CreateOrderProdsFromCartItemsDiscounts(
+            List<(E.CartItem items, double discount)> cartItemDiscounts,
+            List<(E.CartItem, E.Coupon)> activatedCoupons
+        );
     }
 }

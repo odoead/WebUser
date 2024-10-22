@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -19,12 +18,12 @@ namespace WebUser.features.Point.Functions
         public class Handler : IRequestHandler<GetPointByIDQuery, PointDTO>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(DB_Context context, IMapper mapper)
+
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
+
             }
 
             public async Task<PointDTO> Handle(GetPointByIDQuery request, CancellationToken cancellationToken)
@@ -32,7 +31,19 @@ namespace WebUser.features.Point.Functions
                 if (await dbcontext.Points.AnyAsync(q => q.ID == request.Id, cancellationToken: cancellationToken))
                 {
                     var point = await dbcontext.Points.FirstOrDefaultAsync(q => q.ID == request.Id, cancellationToken: cancellationToken);
-                    var results = mapper.Map<PointDTO>(point);
+                    var results = new PointDTO
+                    {
+                        ID = point.ID,
+                        Value = point.Value,
+                        BalanceLeft = point.BalanceLeft,
+                        isExpirable = point.IsExpirable,
+                        IsUsed = point.IsUsed,
+                        IsActive = point.IsUsed,
+                        CreateDate = point.CreateDate,
+                        ExpireDate = point.ExpireDate,
+                        UserID = point.UserID,
+                        OrderID = point.OrderID,
+                    };
                     return results;
                 }
                 throw new PointNotFoundException(request.Id);

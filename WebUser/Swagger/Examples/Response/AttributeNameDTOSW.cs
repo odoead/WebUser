@@ -6,17 +6,17 @@ namespace WebUser.features.AttributeName.DTO
     public class AttributeNameDTOSW : IExamplesProvider<AttributeNameDTO>
     {
         public AttributeNameDTO GetExamples() =>
-            new AttributeNameDTO
+            new()
             {
                 Name = "color",
                 Description = "main color of the product",
                 Id = 1,
                 AttributeValues = new List<AttributeValueDTO>
                 {
-                    new AttributeValueDTO { ID = 1, Value = "black" },
-                    new AttributeValueDTO { ID = 2, Value = "red" },
-                    new AttributeValueDTO { ID = 1, Value = "blue" }
-                }
+                    new() { ID = 1, Value = "black" },
+                    new() { ID = 2, Value = "red" },
+                    new() { ID = 1, Value = "blue" },
+                },
             };
     }
 }

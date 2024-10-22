@@ -4,7 +4,6 @@ namespace WebUser.features.User
     using System.Security.Claims;
     using System.Security.Cryptography;
     using System.Text;
-    using AutoMapper;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.IdentityModel.Tokens;
@@ -18,27 +17,35 @@ namespace WebUser.features.User
     {
         private readonly DB_Context dbContext;
         private readonly ILoggerManager logger;
-        private readonly IMapper mapper;
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
         private User? user;
 
-        public UserService(DB_Context context, IMapper mapper, ILoggerManager logger, IConfiguration configuration, UserManager<User> userManager)
+        public UserService(DB_Context context, ILoggerManager logger, IConfiguration configuration, UserManager<User> userManager)
         {
-            this.mapper = mapper;
+
             this.logger = logger;
             this.configuration = configuration;
             this.dbContext = context;
             this.userManager = userManager;
         }
 
-        public async Task<bool> ValidateUser(string password, string username)
+        public async Task<bool> ValidateUser(string password, string email)
         {
-            user = await userManager.FindByNameAsync(username);
+            user = await userManager.FindByEmailAsync(email);
             var result = user != null && await userManager.CheckPasswordAsync(user, password);
             if (result == false)
+            {
                 logger.LogWarn($"{nameof(ValidateUser)}: Authentication failed. Wrong user name or password.");
+            }
+
             return result;
+        }
+
+        public async Task<string> GetNameByEmail(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+            return user.FirstName + " " + user.LastName;
         }
 
         public async Task<TokenDTO> CreateToken(bool populationExp)
@@ -59,7 +66,13 @@ namespace WebUser.features.User
             }
 
             var acessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-            return new TokenDTO { AccessToken = acessToken, RefreshToken = refreshToken };
+            return new TokenDTO
+            {
+                AccessToken = acessToken,
+                RefreshToken = refreshToken,
+                Email = user.Email,
+                Name = user.FirstName + " " + user.LastName,
+            };
         }
 
         private static SigningCredentials GetSigningCredentials()
@@ -104,7 +117,7 @@ namespace WebUser.features.User
         {
             var jwtConfig = configuration.GetSection("JWT");
 
-            var TokenValidationParameter = new TokenValidationParameters
+            var tokenValidationParameter = new TokenValidationParameters
             {
                 ValidateAudience = true,
                 ValidateIssuer = true,
@@ -112,11 +125,11 @@ namespace WebUser.features.User
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET"))),
                 ValidateLifetime = true,
                 ValidIssuer = jwtConfig["Issuer"],
-                ValidAudience = jwtConfig["Audience"]
+                ValidAudience = jwtConfig["Audience"],
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, TokenValidationParameter, out securityToken);
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameter, out securityToken);
             var jwtSecurityToken = securityToken as JwtSecurityToken;
             if (
                 jwtSecurityToken == null

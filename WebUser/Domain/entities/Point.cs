@@ -32,5 +32,11 @@ namespace WebUser.Domain.entities
         [ForeignKey("OrderID")]
         public Order? Order { get; set; }
         public int? OrderID { get; set; }
+
+        public static bool IsActive(Point point)
+        {
+            var isValid = (point.IsExpirable == false || point.ExpireDate > DateTime.UtcNow) && (point.IsUsed == false);
+            return isValid;
+        }
     }
 }

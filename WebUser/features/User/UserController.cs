@@ -2,12 +2,14 @@ namespace WebUser.features.User;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.Domain.entities;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using WebUser.features.User.DTO;
 using WebUser.features.User.Functions;
 using WebUser.shared;
 using WebUser.shared.RepoWrapper;
+using static WebUser.features.User.Functions.SetNotifier;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -25,17 +27,15 @@ public class UserController : ControllerBase
         service = serviceWrapper;
     }
 
-
-
     /// <summary>
-    /// еуеееееееееее
+    /// register new account
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
     [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+    [ValidationFilter]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ModelStateDictionary), (int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult> Register([FromBody] CreateUser.CreateUserCommand command)
     {
         var result = await mediator.Send(command);
@@ -49,19 +49,30 @@ public class UserController : ControllerBase
             {
                 ModelState.TryAddModelError(error.Code, error.Description);
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(TokenDTO), 200)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     public async Task<ActionResult> Authenticate([FromBody] AuthDTO command)
     {
-        if (!await service.User.ValidateUser(command.Password, command.Username))
+        if (!await service.User.ValidateUser(command.Password, command.Email))
         {
             return Unauthorized();
         }
+        var name = await service.User.GetNameByEmail(command.Email);
         var tokenDTO = await service.User.CreateToken(true);
         return Ok(tokenDTO);
+    }
+
+    [HttpPost("setNotifier")]
+    [Authorize(Roles = "User")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    public async Task<ActionResult> SetNotifier([FromBody] SetNotifierCommand command)
+    {
+        await mediator.Send(command);
+        return NoContent();
     }
 }

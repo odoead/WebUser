@@ -1,16 +1,14 @@
+namespace WebUser.Domain.entities;
+
 using System.ComponentModel.DataAnnotations;
 
-namespace WebUser.Domain.entities
+public class AttributeName
 {
-    public class AttributeName
-    {
-        [Key]
-        public int ID { get; set; }
+    [Key]
+    public int ID { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    public ICollection<AttributeNameCategory> Categories { get; set; } = new List<AttributeNameCategory>();
+    public ICollection<AttributeValue> AttributeValues { get; set; } = new List<AttributeValue>();
 
-        [Required(ErrorMessage = "Attribute name is required")]
-        public string Name { get; set; }
-        public ICollection<AttributeValue> AttributeValues { get; set; }
-        public string? Description { get; set; }
-        public ICollection<AttributeNameCategory> Categories { get; set; }
-    }
 }

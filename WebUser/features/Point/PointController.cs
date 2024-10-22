@@ -2,11 +2,13 @@ namespace WebUser.features.Point;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.OrderProduct.DTO;
 using WebUser.features.Point.DTO;
 using WebUser.features.Point.Functions;
 using WebUser.shared;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -23,7 +25,8 @@ public class PointController : ControllerBase
     }
 
     [HttpPost]
-    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ValidationFilter]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PointDTO), (int)HttpStatusCode.Created)]
     public async Task<ActionResult> Create([FromBody] CreatePoint.CreatePointCommand command)
     {
@@ -32,24 +35,28 @@ public class PointController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> Delete(int id)
     {
-        var comm = new DeletePoint.DeletePointCommand { ID = id, };
+        var comm = new DeletePoint.DeletePointCommand { ID = id };
         await mediator.Send(comm);
         return NoContent();
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<PointDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<PointDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] PointRequestParameters parameters)
     {
-        var query = new GetAllPoints.GetAllPointsQuery();
+        var query = new GetAllPoints.GetAllPointsQuery(parameters);
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("{id:int}", Name = "GetPointByID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(PointDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetPointByID(int id)
     {

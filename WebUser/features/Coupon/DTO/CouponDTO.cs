@@ -11,9 +11,9 @@ namespace WebUser.features.Coupon.DTO
         public DateTime CreatedAt { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveTo { get; set; }
-        public double DiscountVal { get; set; }
-        public float DiscountPercent { get; set; }
-        public int OrderID { get; set; }
+        public double? DiscountVal { get; set; }
+        public float? DiscountPercent { get; set; }
+        public int? OrderID { get; set; }
         public ProductMinDTO Product { get; set; }
     }
 }

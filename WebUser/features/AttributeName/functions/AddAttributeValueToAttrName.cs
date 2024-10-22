@@ -1,4 +1,4 @@
-using AutoMapper;
+using System.ComponentModel.DataAnnotations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -11,35 +11,42 @@ namespace WebUser.features.AttributeName.functions
     {
         public class AddAttributeValueCommand : IRequest
         {
+            [Required]
             public string AttributeValue { get; set; }
+            [Required]
             public int AttributeNameID { get; set; }
         }
 
         public class Handler : IRequestHandler<AddAttributeValueCommand>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(IMapper mapper, DB_Context context)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
             public async Task Handle(AddAttributeValueCommand request, CancellationToken cancellationToken)
             {
                 var attributeName =
                     await dbcontext
-                        .AttributeNames.Where(q => q.ID == request.AttributeNameID)
-                        .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                        .AttributeNames.Include(a => a.AttributeValues)
+                        .FirstOrDefaultAsync(q => q.ID == request.AttributeNameID, cancellationToken)
                     ?? throw new AttributeNameNotFoundException(request.AttributeNameID);
-                var attributeValue =
-                    await dbcontext
-                        .AttributeValues.Where(q => q.AttributeName == attributeName && q.Value == request.AttributeValue)
-                        .FirstOrDefaultAsync(cancellationToken: cancellationToken)
-                    ?? new E.AttributeValue { AttributeName = attributeName, Value = request.AttributeValue };
-                attributeName.AttributeValues.Add(attributeValue);
-                await dbcontext.SaveChangesAsync(cancellationToken);
+
+                if (!attributeName.AttributeValues.Any(av => av.Value == request.AttributeValue))
+                {
+                    attributeName.AttributeValues.Add(
+                        new E.AttributeValue
+                        {
+                            AttributeName = attributeName,
+                            Value = request.AttributeValue,
+                            AttributeNameID = request.AttributeNameID,
+                        }
+                    );
+
+                    await dbcontext.SaveChangesAsync(cancellationToken);
+                }
             }
         }
     }

@@ -1,10 +1,17 @@
+using WebUser.PricingService.DTO;
 using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Promotion.PromoBuilder.Actions
 {
     public static class GetDiscountCart
     {
-        public static List<(E.CartItem, double)> GetDiscountAct(this E.Cart cart, double discountValue, float discountPercent)
+        public static List<(E.CartItem, double)> GetDiscountAct(this E.Cart cart, double discountValue, float discountPercent) =>
+            GenerateDiscounts(cart, discountValue, discountPercent);
+
+        public static List<(E.CartItem, double)> GetDiscountAct(this IQueryable<E.Cart> cartQuery, double discountValue, float discountPercent) =>
+            GenerateDiscounts(cartQuery.FirstOrDefault(), discountValue, discountPercent);
+
+        private static List<(E.CartItem, double)> GenerateDiscounts(E.Cart cart, double discountValue, float discountPercent)
         {
             var itemDiscounts = new List<(E.CartItem, double)>();
             var cartItems = cart.Items;
@@ -18,11 +25,12 @@ namespace WebUser.features.Promotion.PromoBuilder.Actions
                 }
                 if (discountPercent > 0)
                 {
-                    discountVal += basePrice * (discountPercent) / 100;
+                    discountVal += basePrice * discountPercent / 100;
                 }
                 itemDiscounts.Add((item, discountVal));
             }
             return itemDiscounts;
         }
+        
     }
 }

@@ -10,7 +10,7 @@ using WebUser.features.Promotion_TODO.DTO;
 public class ProductPageDTOSW : IExamplesProvider<ProductPageDTO>
 {
     public ProductPageDTO GetExamples() =>
-        new ProductPageDTO
+        new()
         {
             ID = 1,
             Description = "description",
@@ -19,33 +19,33 @@ public class ProductPageDTOSW : IExamplesProvider<ProductPageDTO>
             IsPurchasable = true,
             Images = new List<ImageDTO>
             {
-                new ImageDTO { ID = 1, ImageContent = new byte[] { } }
+                new() { ID = 1, ImageContent = new byte[] { } },
             },
             AttributeValues = new List<AttributeNameValueDTO>()
             {
-                new AttributeNameValueDTO
+                new()
                 {
                     AttributeName = new AttributeNameMinDTO { ID = 1, Name = "Color" },
                     Attributes = new List<AttributeValueDTO>
                     {
-                        new AttributeValueDTO { ID = 1, Value = "Red" },
-                        new AttributeValueDTO { ID = 2, Value = "Blue" }
-                    }
-                }
+                        new() { ID = 1, Value = "Red" },
+                        new() { ID = 2, Value = "Blue" },
+                    },
+                },
             },
             Discounts = new List<DiscountMinDTO>()
             {
-                new DiscountMinDTO
+                new()
                 {
                     ID = 1,
                     DiscountVal = 56,
                     DiscountPercent = 0,
-                    IsActive = true
-                }
+                    IsActive = true,
+                },
             },
             Promotions = new List<PromotionProductPageDTO>()
             {
-                new PromotionProductPageDTO { Name = "sale", Description = "buy one get two promo" }
-            }
+                new() { Name = "sale", Description = "buy one get two promo" },
+            },
         };
 }

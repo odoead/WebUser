@@ -7,6 +7,8 @@ namespace WebUser.Data
 {
     public class DB_Context : IdentityDbContext<User>
     {
+        public DB_Context() { }
+
         public DB_Context(DbContextOptions options)
             : base(options) { }
 
@@ -60,7 +62,7 @@ namespace WebUser.Data
             builder
                 .Entity<PromotionPromProduct>()
                 .HasOne(pav => pav.Promotion)
-                .WithMany(p => p.PromoProducts)
+                .WithMany(p => p.PromProducts)
                 .HasForeignKey(pav => pav.PromotionID)
                 .OnDelete(DeleteBehavior.Cascade);
             builder
@@ -96,6 +98,28 @@ namespace WebUser.Data
                 .HasOne(pav => pav.AttributeName)
                 .WithMany(av => av.Categories)
                 .HasForeignKey(pav => pav.AttributeNameID)
+                .OnDelete(DeleteBehavior.Cascade);
+            //------- cascade delete of revieews after product deleting
+            builder
+                .Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
+            //--------
+            builder.Entity<ProductUserNotificationRequest>().HasKey(pav => new { pav.ProductID, pav.UserID });
+            builder
+                .Entity<ProductUserNotificationRequest>()
+                .HasOne(pav => pav.Product)
+                .WithMany(p => p.RequestNotifications)
+                .HasForeignKey(pav => pav.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .Entity<ProductUserNotificationRequest>()
+                .HasOne(pav => pav.User)
+                .WithMany(av => av.RequestNotifications)
+                .HasForeignKey(pav => pav.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
             /*modelBuilder
                 .Entity<Promotion>()
@@ -142,5 +166,7 @@ namespace WebUser.Data
         public DbSet<PromotionCategory> PromotionCategories { get; set; }
         public DbSet<PromotionPromProduct> PromotionPromProducts { get; set; }
         public DbSet<AttributeNameCategory> AttributeNameCategories { get; set; }
+        public DbSet<Review> ProductReviews { get; set; }
+        public DbSet<ProductUserNotificationRequest> RequestNotifications { get; set; }
     }
 }

@@ -6,7 +6,7 @@ namespace WebUser.features.Coupon.DTO
     public class CouponDTOSW : IExamplesProvider<CouponDTO>
     {
         public CouponDTO GetExamples() =>
-            new CouponDTO
+            new()
             {
                 ActiveFrom = DateTime.UtcNow.AddDays(10),
                 ID = 1,
@@ -22,7 +22,7 @@ namespace WebUser.features.Coupon.DTO
                     ID = 5,
                     Name = "smartphone",
                     Price = 1500,
-                }
+                },
             };
     }
 }

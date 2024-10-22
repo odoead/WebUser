@@ -1,8 +1,13 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
+using WebUser.features.AttributeName.DTO;
+using WebUser.features.AttributeValue.DTO;
+using WebUser.features.Coupon.DTO;
+using WebUser.features.Discount.DTO;
+using WebUser.features.Image.DTO;
 using WebUser.features.Product.DTO;
+using WebUser.features.Promotion_TODO.DTO;
 using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Product.Functions
@@ -23,12 +28,10 @@ namespace WebUser.features.Product.Functions
         public class Handler : IRequestHandler<CreateProductCommand, ProductDTO>
         {
             private readonly DB_Context dbcontext;
-            private readonly IMapper mapper;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
             public async Task<ProductDTO> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -44,12 +47,39 @@ namespace WebUser.features.Product.Functions
                     Price = request.Price,
                     Stock = request.Stock,
                     DateCreated = DateTime.UtcNow,
-                    ReservedStock = 0
+                    ReservedStock = 0,
                 };
                 await dbcontext.Products.AddAsync(product, cancellationToken);
                 await dbcontext.SaveChangesAsync(cancellationToken);
-                var results = mapper.Map<ProductDTO>(product);
-                return results;
+
+                var productDTO = new ProductDTO
+                {
+                    ID = product.ID,
+                    Description = product.Description,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Stock = product.Stock,
+                    ReservedStock = product.ReservedStock,
+                    IsPurchasable = product.Stock > product.ReservedStock,
+                    DateCreated = product.DateCreated,
+
+                    AttributeValues = product
+                        .AttributeValues.GroupBy(av => av.AttributeValue.AttributeName)
+                        .Select(g => new AttributeNameValueDTO
+                        {
+                            AttributeName = new AttributeNameMinDTO { ID = g.Key.ID, Name = g.Key.Name },
+                            Attributes = g.Select(av => new AttributeValueDTO { ID = av.AttributeValue.ID, Value = av.AttributeValue.Value })
+                                .ToList(),
+                        })
+                        .ToList(),
+
+                    Images = new List<ImageDTO>(),
+                    Discounts = new List<DiscountMinDTO>(),
+                    Coupons = new List<CouponMinDTO>(),
+                    Promotions = new List<PromotionMinDTO>(),
+                };
+
+                return productDTO;
             }
         }
     }

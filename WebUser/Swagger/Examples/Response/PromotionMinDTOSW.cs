@@ -4,5 +4,5 @@ using Swashbuckle.AspNetCore.Filters;
 
 public class PromotionMinDTOSW : IExamplesProvider<PromotionMinDTO>
 {
-    public PromotionMinDTO GetExamples() => new PromotionMinDTO { Name = "sale", ID = 5 };
+    public PromotionMinDTO GetExamples() => new() { Name = "sale", ID = 5 };
 }

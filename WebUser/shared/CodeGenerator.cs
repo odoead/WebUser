@@ -4,7 +4,7 @@ namespace WebUser.shared
 {
     public static class CodeGenerator
     {
-        static readonly Random random = new Random();
+        static readonly Random random = new();
 
         public static string GenerateCode(int length)
         {

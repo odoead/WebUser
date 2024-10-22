@@ -4,9 +4,6 @@ using System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.Order.DTO;
-using WebUser.features.OrderProduct.DTO;
-using WebUser.features.OrderProduct.Functions;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -22,21 +19,5 @@ public class OrderProductController : ControllerBase
         this.mediator = mediator;
     }
 
-    [HttpGet]
-    [ProducesResponseType(typeof(List<OrderProductDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
-    {
-        var query = new GetAllOrderProds.GetAllOrderProdsAsyncQuery();
-        var result = await mediator.Send(query);
-        return Ok(result);
-    }
 
-    [HttpGet("order/{orderid:int}", Name = "GetOrderProductsByOrderID")]
-    [ProducesResponseType(typeof(List<OrderProductDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetByUserID(int orderid)
-    {
-        var query = new GetOrderProdByOrderID.GetByOrderProdIDQuery { OrderId = orderid };
-        var result = await mediator.Send(query);
-        return Ok(result);
-    }
 }

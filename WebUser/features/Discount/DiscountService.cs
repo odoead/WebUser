@@ -17,16 +17,16 @@ namespace WebUser.features.discount
         public async Task<double> ApplyDiscountForProduct(E.Product Product)
         {
             var discount = await Context
-                .Discounts.Where(q => q.Product.ID == Product.ID && q.ActiveFrom <= DateTime.UtcNow && q.ActiveTo >= DateTime.UtcNow)
+                .Discounts.Where(q => q.Product.ID == Product.ID && E.Discount.IsActive(q))
                 .FirstOrDefaultAsync();
             var newPrice = discount.Product.Price;
             if (discount.DiscountVal > 0)
             {
-                newPrice -= discount.DiscountVal;
+                newPrice -= discount.DiscountVal.Value;
             }
             if (discount.DiscountPercent > 0)
             {
-                newPrice = newPrice * discount.DiscountVal / 100;
+                newPrice = newPrice * discount.DiscountVal.Value / 100;
             }
             return newPrice;
         }

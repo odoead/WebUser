@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -10,31 +9,36 @@ namespace WebUser.features.Image.Functions
 {
     public class GetImagesByProductID
     {
-        public class GetImagesByProductIDQuery : IRequest<List<ImageDTO>>
+        public class GetImagesByProductIDQuery : IRequest<ICollection<ImageDTO>>
         {
             public int ProductId { get; set; }
         }
 
         //handler
-        public class Handler : IRequestHandler<GetImagesByProductIDQuery, List<ImageDTO>>
+        public class Handler : IRequestHandler<GetImagesByProductIDQuery, ICollection<ImageDTO>>
         {
-            private readonly IMapper mapper;
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
-            public async Task<List<ImageDTO>> Handle(GetImagesByProductIDQuery request, CancellationToken cancellationToken)
+            public async Task<ICollection<ImageDTO>> Handle(GetImagesByProductIDQuery request, CancellationToken cancellationToken)
             {
                 if (await dbcontext.Products.AnyAsync(q => q.ID == request.ProductId, cancellationToken: cancellationToken))
+                {
                     throw new ProductNotFoundException(request.ProductId);
+                }
+
                 var images =
                     await dbcontext.Img.Where(q => q.Product.ID == request.ProductId).ToListAsync(cancellationToken: cancellationToken)
                     ?? throw new ImageNotFoundException(-1);
-                var results = mapper.Map<List<ImageDTO>>(images);
+                var results = new List<ImageDTO>();
+                images.ForEach(image =>
+                {
+                    results.Add(new ImageDTO { ID = image.ID, ImageContent = image.ImageContent });
+                });
                 return results;
             }
         }

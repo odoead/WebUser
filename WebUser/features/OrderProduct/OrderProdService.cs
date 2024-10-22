@@ -35,28 +35,44 @@ namespace WebUser.features.OrderProduct
             return orderProducts;
         }
 
-        public ICollection<E.OrderProduct> CreateOrderProdsFromCartItemsDiscounts(List<(E.CartItem items, double discount)> cartItemDiscounts)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="cartItemDiscounts"></param>
+        /// <returns></returns>
+        public ICollection<E.OrderProduct> CreateOrderProdsFromCartItemsDiscounts(
+            List<(E.CartItem items, double discount)> cartItemDiscounts,
+            List<(E.CartItem, E.Coupon)> activatedCoupons
+        )
         {
             var totalDiscountProduct = cartItemDiscounts
-                .GroupBy(item => item.items)
-                .Select(group => new
-                {
-                    Amount = group.Sum(item => item.items.Amount),
-                    Product = group.Key,
-                    TotalDiscount = group.Sum(item => item.discount) // Calculate sum of costs for each product
-                });
+                .GroupBy(discount => discount.items)
+                .Select(group => new { Product = group.Key, TotalDiscount = group.Sum(item => item.discount) });
             List<E.OrderProduct> orderProducts = new List<E.OrderProduct>();
             foreach (var item in totalDiscountProduct)
             {
-                orderProducts.Add(
-                    new E.OrderProduct
-                    {
-                        Amount = item.Amount,
-                        Product = item.Product.Product,
-                        FinalPrice = item.Product.Product.Price - item.TotalDiscount,
-                    }
-                );
+                var finalPrice = item.Product.Product.Price - item.TotalDiscount;
+                var orderProduct = new E.OrderProduct
+                {
+                    Amount = item.Product.Amount,
+                    Product = item.Product.Product,
+                    ProductID = item.Product.ProductID,
+                    FinalPrice = finalPrice > 0 ? finalPrice : 1,
+                };
+
+                var matchingCoupons = activatedCoupons.Where(c => c.Item1 == item.Product).Select(c => c.Item2);
+
+                foreach (var coupon in matchingCoupons)
+                {
+                    orderProduct.ActivatedCoupons.Add(coupon);
+                }
+                orderProducts.Add(orderProduct);
             }
+
+            /*foreach (var item in activatedCoupons)
+            {
+                
+            }*/
             return orderProducts;
         }
     }

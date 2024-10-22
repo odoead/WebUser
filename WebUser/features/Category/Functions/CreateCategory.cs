@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -14,19 +13,17 @@ namespace WebUser.features.Category.Functions
         {
             public string Name { get; set; }
             public List<int>? SubcategoriesID { get; set; }
-            public int ParentCategoryID { get; set; }
+            public int? ParentCategoryID { get; set; }
         }
 
         //handler
         public class Handler : IRequestHandler<CreateCategoryCommand, CategoryDTO>
         {
-            private readonly IMapper mapper;
             private readonly DB_Context dbcontext;
 
-            public Handler(DB_Context context, IMapper mapper)
+            public Handler(DB_Context context)
             {
                 dbcontext = context;
-                this.mapper = mapper;
             }
 
             public async Task<CategoryDTO> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
@@ -38,9 +35,13 @@ namespace WebUser.features.Category.Functions
                         .Categories.Where(q => request.SubcategoriesID.Contains(q.ID))
                         .ToListAsync(cancellationToken: cancellationToken);
                 }
-                var parent = await dbcontext
-                    .Categories.Where(q => q.ID == request.ParentCategoryID)
-                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                E.Category? parent = null;
+                if (request.ParentCategoryID != null)
+                {
+                    parent = await dbcontext
+                        .Categories.Where(q => q.ID == request.ParentCategoryID)
+                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                }
                 var category = new E.Category
                 {
                     Name = request.Name,
@@ -48,18 +49,41 @@ namespace WebUser.features.Category.Functions
                     ParentCategory = parent,
                 };
                 if (
-                    !await dbcontext.Categories.AnyAsync(
-                        q => q.Name == category.Name && q.Subcategories == category.Subcategories && q.ParentCategory == category.ParentCategory,
-                        cancellationToken: cancellationToken
-                    )
+                    !await dbcontext
+                        .Categories.Include(q => q.Subcategories)
+                        .Include(q => q.ParentCategory)
+                        .AnyAsync(
+                            q => q.Name == category.Name && q.Subcategories == category.Subcategories && q.ParentCategory == category.ParentCategory,
+                            cancellationToken: cancellationToken
+                        )
                 )
                 {
                     await dbcontext.Categories.AddAsync(category, cancellationToken);
-                    //parent.Subcategories.Add(category);
-                    //subcategories.Select(q => q.ParentCategory);
+                    parent?.Subcategories.Add(category);
                     await dbcontext.SaveChangesAsync(cancellationToken);
+
+                    return new CategoryDTO
+                    {
+                        ID = category.ID,
+                        Name = category.Name,
+                        ParentCategory = parent != null ? new CategoryMinDTO { ID = parent.ID, Name = parent.Name } : null,
+                        Subcategories = subcategories.Select(subcat => new CategoryMinDTO { ID = subcat.ID, Name = subcat.Name }).ToList(),
+                        Attributes = null,
+                    };
                 }
-                var results = mapper.Map<CategoryDTO>(category);
+                var alreadyExists = await dbcontext.Categories.FirstOrDefaultAsync(
+                    q => q.Name == category.Name && q.Subcategories == category.Subcategories && q.ParentCategory == category.ParentCategory,
+                    cancellationToken: cancellationToken
+                );
+                var results = new CategoryDTO
+                {
+                    ID = alreadyExists.ID,
+                    Name = alreadyExists.Name,
+                    ParentCategory = parent != null ? new CategoryMinDTO { ID = parent.ID, Name = parent.Name } : null,
+                    Subcategories = subcategories.Select(subcat => new CategoryMinDTO { ID = subcat.ID, Name = subcat.Name }).ToList(),
+                    Attributes = null,
+                };
+
                 return results;
             }
         }

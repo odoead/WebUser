@@ -1,11 +1,11 @@
-using WebUser.features.Product.DTO;
-
 namespace WebUser.features.CartItem.DTO
 {
     public class CartItemDTO
     {
         public int ID { get; set; }
         public int Amount { get; set; }
-        public ProductMinDTO ProductMin { get; set; }
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
+        public double ProductBasePrice { get; set; }
     }
 }

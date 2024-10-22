@@ -2,10 +2,12 @@ namespace WebUser.features.Discount;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebUser.features.Coupon.DTO;
 using WebUser.features.discount.DTO;
 using WebUser.features.discount.Functions;
+using WebUser.shared.Action_filter;
+using WebUser.shared.RequestForming.features;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -22,15 +24,23 @@ public class DiscountController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<DiscountDTO>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult> GetAll()
+    [Paging]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(PagedList<DiscountDTO>), (int)HttpStatusCode.OK)]
+    public async Task<ActionResult> GetAll([FromQuery] DiscountRequestParameters parameters)
     {
-        var query = new GetAllDiscounts.GetAllDiscountsQuery();
+        var query = new GetAllDiscounts.GetAllDiscountsQuery(parameters);
         var result = await mediator.Send(query);
-        return Ok(result);
+        return Ok(
+            new
+            {
+                Items = result.ToList(),
+
+            });
     }
 
     [HttpGet("product/{id:int}", Name = "GetDiscountByProductID")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(DiscountDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetDiscountByProductID(int id)
     {
