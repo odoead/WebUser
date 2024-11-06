@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Order.DTO;
-using WebUser.features.OrderProduct.DTO;
 using WebUser.features.Point.DTO;
 using WebUser.features.Product.DTO;
 using WebUser.shared.RequestForming.features;
@@ -27,16 +26,13 @@ namespace WebUser.features.Order.Functions
         {
             private readonly DB_Context dbcontext;
 
-
             public Handler(DB_Context context)
             {
                 dbcontext = context;
-
             }
-
             public async Task<PagedList<OrderDTO>> Handle(GetAllOrdersAsyncQuery request, CancellationToken cancellationToken)
             {
-                var data = dbcontext.Orders.Include(q => q.Points).Include(q => q.OrderProduct).ThenInclude(q => q.Product).AsQueryable();
+                var data = dbcontext.Orders.Include(q => q.Points).Include(q => q.OrderProducts).ThenInclude(q => q.Product).AsQueryable();
                 var orderDTOs = new List<OrderDTO>();
                 foreach (var order in data)
                 {
@@ -47,12 +43,12 @@ namespace WebUser.features.Order.Functions
                         DeliveryAddress = order.DeliveryAddress,
                         DeliveryMethod = order.DeliveryMethod,
                         PaymentMethod = order.PaymentMethod,
-                        Status = order.Status,
+                        Status = order.IsCompleted,
                         Payment = order.Payment,
                         UserID = order.UserID,
                         PointsUsed = order.PointsUsed,
                         OrderProducts = order
-                            .OrderProduct.Select(op => new OrderProductDTO
+                            .OrderProducts.Select(op => new OrderProductDTO
                             {
                                 ID = op.ProductID,
                                 Amount = op.Amount,

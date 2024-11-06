@@ -1,6 +1,5 @@
 namespace WebUser.features.Product.Functions;
 
-using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,7 @@ public class AddReviewToProduct
         public string Body { get; set; }
         public int Rating { get; set; }
         public int ProductID { get; set; }
-        public ClaimsPrincipal UserClaims { get; set; }
+        public string UserId { get; set; } = string.Empty;
     }
 
     //handler
@@ -35,8 +34,8 @@ public class AddReviewToProduct
 
         public async Task<ReviewDTO> Handle(AddReviewToProductCommand request, CancellationToken cancellationToken)
         {
-            var userId = request.UserClaims.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByEmailAsync(request.UserId);
+
 
             var product =
                 await dbcontext.Products.FirstOrDefaultAsync(q => q.ID == request.ProductID, cancellationToken: cancellationToken)

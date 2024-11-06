@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using WebUser.Data;
+using WebUser.Domain.entities;
 using WebUser.features.AttributeName;
 using WebUser.features.AttributeName.Interfaces;
 using WebUser.features.AttributeValue;
@@ -20,23 +22,33 @@ using WebUser.features.Point;
 using WebUser.features.Point.Interfaces;
 using WebUser.features.Promotion;
 using WebUser.features.Promotion.Interfaces;
+using WebUser.features.User;
 using WebUser.features.User.Interfaces;
+using WebUser.PricingService.interfaces;
+using WebUser.shared.Logger;
 using WebUser.shared.RepoWrapper;
 
 namespace WebUser.shared.ServiceWrapper
 {
     public class ServiceWrapper : IServiceWrapper
     {
-        public ServiceWrapper(DB_Context db)
+
+        public ServiceWrapper(DB_Context db, ILoggerManager logger, IConfiguration configuration, UserManager<User> userManager)
         {
             this.db = db;
+            this.logger = logger;
+            this.configuration = configuration;
+            this.userManager = userManager;
         }
 
         private readonly DB_Context db;
+        private readonly ILoggerManager logger;
+        private readonly UserManager<User> userManager;
+        private readonly IConfiguration configuration;
+
         private IAttributeNameService attributeNameServ;
         private IAttributeValueService attributeValueServ;
         private ICartService cartServ;
-        private ICartItemService cartItemServ;
         private ICategoryService categoryServ;
         private ICouponService couponServ;
         private IDiscountService discountServ;
@@ -47,6 +59,8 @@ namespace WebUser.shared.ServiceWrapper
         private IProductService productServ;
         private IPromotionService promotionServ;
         private IUserService userServ;
+        private IPricingService pricingServ;
+
         public IAttributeNameService AttributeName
         {
             get
@@ -83,18 +97,7 @@ namespace WebUser.shared.ServiceWrapper
                 return cartServ;
             }
         }
-        public ICartItemService CartItem
-        {
-            get
-            {
-                if (cartItemServ == null)
-                {
-                    cartItemServ = new CartItemService(db);
-                }
 
-                return cartItemServ;
-            }
-        }
         public ICategoryService Category
         {
             get
@@ -207,9 +210,21 @@ namespace WebUser.shared.ServiceWrapper
         {
             get
             {
-                //if (userServ == null)
-                //userServ = new UserService(db);
+                if (userServ == null)
+                { userServ = new UserService(db, logger, configuration, userManager); }
                 return userServ;
+            }
+        }
+        public IPricingService Pricing
+        {
+            get
+            {
+                if (pricingServ == null)
+                {
+                    pricingServ = new PricingService.PricingService(db);
+                }
+
+                return pricingServ;
             }
         }
 

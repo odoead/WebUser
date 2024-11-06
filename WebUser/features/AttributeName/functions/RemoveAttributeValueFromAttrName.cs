@@ -30,9 +30,7 @@ namespace WebUser.features.AttributeName.functions
                         .FirstOrDefaultAsync(q => q.ID == request.AttributeNameId, cancellationToken: cancellationToken)
                     ?? throw new AttributeNameNotFoundException(request.AttributeNameId);
 
-                var attributeValue = await dbcontext
-                    .AttributeValues.Where(q => q.AttributeNameID == request.AttributeNameId && q.ID == request.AttributeValueId)
-                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                var attributeValue = attributeName.AttributeValues.FirstOrDefault(q => q.ID == request.AttributeValueId);
                 if (attributeValue != null)
                 {
                     dbcontext.AttributeValues.Remove(attributeValue);

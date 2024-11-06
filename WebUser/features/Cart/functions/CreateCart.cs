@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Cart.DTO;
-using WebUser.features.CartItem.DTO;
 using WebUser.features.User.Exceptions;
 using E = WebUser.Domain.entities;
 
@@ -29,12 +28,10 @@ namespace WebUser.features.Cart.functions
             public async Task<CartDTO> Handle(CreateCartCommand request, CancellationToken cancellationToken)
             {
                 var user =
-                    await dbcontext.Users.FirstOrDefaultAsync(q => q.Id == request.UserId, cancellationToken: cancellationToken)
+                    await dbcontext.Users.Include(q => q.Cart).ThenInclude(q => q.Items).FirstOrDefaultAsync(q => q.Id == request.UserId, cancellationToken: cancellationToken)
                     ?? throw new UserNotFoundException(request.UserId);
 
-                var existingCart = await dbcontext
-                    .Carts.Include(c => c.Items)
-                    .FirstOrDefaultAsync(q => q.User.Id == user.Id, cancellationToken: cancellationToken);
+                var existingCart = user.Cart;
 
                 if (existingCart != null)
                 {
@@ -47,11 +44,9 @@ namespace WebUser.features.Cart.functions
                 }
 
                 var cart = new E.Cart { User = user, Items = new List<E.CartItem>() };
-                if (!await dbcontext.Carts.AnyAsync(q => q.User == user, cancellationToken: cancellationToken))
-                {
-                    await dbcontext.Carts.AddAsync(cart, cancellationToken);
-                    await dbcontext.SaveChangesAsync(cancellationToken);
-                }
+
+                await dbcontext.Carts.AddAsync(cart, cancellationToken);
+                await dbcontext.SaveChangesAsync(cancellationToken);
 
                 var results = new CartDTO
                 {

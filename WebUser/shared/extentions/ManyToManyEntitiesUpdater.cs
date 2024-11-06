@@ -14,7 +14,7 @@ public static class ManyToManyEntitiesUpdater
     /// <param name="baseEntity">main entity</param>
     /// <param name="relationEntities">binding entities</param>
     /// <param name="newIds">list of new related ids</param>
-    /// <param name="relationFactory">function that sets rules of binding objects creation</param>
+    /// <param name="relationFactory">function that sets rules of binding object creation</param>
     /// <param name="relatedEntityFinder">function that finds related objects by its id</param>
     /// <returns></returns>
     public static async Task UpateManyToManyRelationsAsync<TEntity, TRelated, TRelation>(
@@ -23,7 +23,6 @@ public static class ManyToManyEntitiesUpdater
         ICollection<TRelation> relationEntities,
         ICollection<int> newIds,
         Func<TEntity, TRelated, TRelation> relationFactory,
-        //Func<int, Task<TRelated>> relatedEntityFinder
         Func<ICollection<int>, Task<List<TRelated>>> relatedEntityFinder
     )
         where TEntity : class
@@ -35,7 +34,7 @@ public static class ManyToManyEntitiesUpdater
             return;
         }
 
-        var relatedObjects = await relatedEntityFinder(newIds);
+        var relatedObjects = await relatedEntityFinder(newIds); //передаем идс из другого параметра (newIds= ICollection<int>)
 
         if (!relatedObjects.Any())
         {
@@ -43,13 +42,55 @@ public static class ManyToManyEntitiesUpdater
         }
 
         var relationSet = dbcontext.Set<TRelation>();
-        relationEntities.Clear(); //clear previous bindings
-
+        if (relationSet != null)
+        {
+            relationEntities.Clear(); //clear previous bindings
+        }
+        else
+        {
+            relationEntities = new List<TRelation>(); //add if doesnt already exist
+        }
         var newRelations = relatedObjects.Select(relatedObject => relationFactory(baseEntity, relatedObject)).ToList(); //create new bindings
         foreach (var relation in newRelations)
         {
             relationEntities.Add(relation);
             relationSet.Add(relation);
         }
+        await dbcontext.SaveChangesAsync();
+
+    }
+
+    //TODO
+    public static async Task UpdateOneToManyRelationsAsync<TEntity, TRelated>(
+        DB_Context dbcontext,
+        TEntity baseEntity,
+        ICollection<TRelated> relatedEntities,
+        ICollection<int> newIds,
+        Func<TEntity, TRelated> relatedEntityFactory,
+        Func<ICollection<int>, Task<List<TRelated>>> relatedEntityFinder
+    )
+        where TEntity : class
+        where TRelated : class
+    {
+        if (newIds == null || !newIds.Any())
+        {
+            return;
+        }
+
+        // Find related objects based on the provided IDs
+        var relatedObjects = await relatedEntityFinder(newIds);
+
+        if (!relatedObjects.Any())
+        {
+            return;
+        }
+
+        relatedEntities.Clear();
+        foreach (var relatedObject in relatedObjects)
+        {
+            var newRelatedEntity = relatedEntityFactory(baseEntity);
+            relatedEntities.Add(newRelatedEntity);
+        }
+        await dbcontext.SaveChangesAsync();
     }
 }

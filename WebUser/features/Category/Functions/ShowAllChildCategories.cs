@@ -32,13 +32,12 @@ namespace WebUser.features.Category.Functions
 
             public async Task<ICollection<CategoryDTO>> Handle(GetAllChildCategoriesQuery request, CancellationToken cancellationToken)
             {
-                if (await dbcontext.Categories.AnyAsync(q => q.ID == request.Id, cancellationToken: cancellationToken))
+                if (!await dbcontext.Categories.AnyAsync(q => q.ID == request.Id, cancellationToken: cancellationToken))
                 {
                     throw new CategoryNotFoundException(request.Id);
                 }
 
                 var children = await service.Category.GetAllGenChildCategories(request.Id);
-                //var results = mapper.Map<ICollection<CategoryDTO>>(children);
                 var results = new List<CategoryDTO>();
                 foreach (var category in children)
                 {

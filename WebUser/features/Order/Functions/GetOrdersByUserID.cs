@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Order.DTO;
-using WebUser.features.OrderProduct.DTO;
 using WebUser.features.Point.DTO;
 using WebUser.features.Product.DTO;
 using WebUser.features.User.Exceptions;
@@ -36,7 +35,7 @@ namespace WebUser.features.Order.Functions
                     ?? throw new UserNotFoundException(request.UserId);
                 var orders = await dbcontext
                     .Orders.Include(q => q.Points)
-                    .Include(q => q.OrderProduct)
+                    .Include(q => q.OrderProducts)
                     .ThenInclude(q => q.Product)
                     .Where(q => q.UserID == user.Id)
                     .ToListAsync(cancellationToken: cancellationToken);
@@ -51,12 +50,12 @@ namespace WebUser.features.Order.Functions
                         DeliveryAddress = order.DeliveryAddress,
                         DeliveryMethod = order.DeliveryMethod,
                         PaymentMethod = order.PaymentMethod,
-                        Status = order.Status,
+                        Status = order.IsCompleted,
                         Payment = order.Payment,
                         UserID = order.UserID,
                         PointsUsed = order.PointsUsed,
                         OrderProducts = order
-                            .OrderProduct.Select(op => new OrderProductDTO
+                            .OrderProducts.Select(op => new OrderProductDTO
                             {
                                 ID = op.ProductID,
                                 Amount = op.Amount,

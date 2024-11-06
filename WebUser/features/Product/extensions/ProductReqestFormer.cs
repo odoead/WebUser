@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using WebUser.features.Product.Enums;
 using E = WebUser.Domain.entities;
@@ -44,11 +45,24 @@ namespace WebUser.features.Product.extensions
         /// <returns></returns>
         public static IQueryable<E.Product> SearchByName(this IQueryable<E.Product> products, string? requestName)
         {
+
+            if (string.IsNullOrEmpty(requestName))
+                return products;
+
             char[] splitChars = { ' ', ',', ';', '-', '_', '.', ':', '\t' };
-            List<string> input = requestName.ToLower().Split(splitChars).ToList();
-            return string.IsNullOrEmpty(requestName)
-                ? products
-                : products.Where((q) => q.Name != null && input.All(item => q.Name.ToLower().Contains(item)));
+            var searchTerms = requestName.Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
+
+            var query = products;
+            // Build the expression outside the query
+            Expression<Func<E.Product, bool>> searchExpression = p => true;
+
+            foreach (var term in searchTerms)
+            {
+                string searchTerm = term; // Create a local variable to capture in the expression
+                query = query.Where(p => EF.Functions.Like(p.Name ?? "", $"%{searchTerm}%"));
+            }
+
+            return query;
         }
 
         /// <summary>
@@ -59,59 +73,16 @@ namespace WebUser.features.Product.extensions
         /// <param name="minPrice"></param>
         /// <param name="maxPrice"></param>
         /// <returns></returns>
-        public static IQueryable<E.Product> Filter(
-            this IQueryable<E.Product> products,
-            List<int> attributeValueIDs,
-            int minPrice = 0,
-            int maxPrice = int.MaxValue
-        ) =>
-            attributeValueIDs.Count > 0
-                ? products.Where(q =>
-                    attributeValueIDs.All(id => q.AttributeValues.Select(p => p.AttributeValueID).Contains(id))
-                    && q.Price >= minPrice
-                    && q.Price <= maxPrice
-                )
-                : products.Where(q => q.Price >= minPrice && q.Price <= maxPrice);
-        /*public static IQueryable<E.Product> FilterByAttributeValues(IQueryable<E.Product> query, string request)
+        public static IQueryable<E.Product> Filter(this IQueryable<E.Product> products, List<int> attributeValueIDs, int minPrice = 0, int maxPrice = int.MaxValue)
         {
-            var categories = request.Split('/').ToList();
-            List<(string attrName, List<string> attrValues)> attrFilter = new List<(string, List<string>)>();
-            var priceRange = new Tuple<int, int>(0, 0);
-            foreach (var part in request.Split("/"))
-            {
-                if (part.StartsWith("range="))
-                {
-                    var rangeParts = part.Substring(6).Split('-');
-                    priceRange = Tuple.Create(int.Parse(rangeParts[0]), int.Parse(rangeParts[1]));
-                }
-                //else if()
-                else
-                {
-                    var keyValue = part.Split('=');
-                    var attrName = keyValue[0];
-                    List<string> attrValue = keyValue[1].Split(',').ToList();
-                    attrFilter.Add((attrName, attrValue));
-                }
-            }
-            query
-                .Include(p => p.AttributeValues)
-                .ThenInclude(q => q.AttributeValue)
-                .ThenInclude(q => q.AttributeName)
-                .ThenInclude(w => w.Category)
-                .Where(p =>
-                    categories.Contains(p.AttributeValues.SelectMany(a => a.AttributeValue.AttributeName.Category.Name))
-                    && p.Price >= priceRange.Item1
-                    && p.Price <= priceRange.Item2
-                );
-            foreach (var filter in attrFilter)
-            {
-                query = query.Where(q =>
-                    q.AttributeValues.Any(a =>
-                        a.AttributeValue.AttributeName.Name == filter.attrName && filter.attrValues.Contains(a.AttributeValue.Value)
-                    )
-                );
-            }
-            return query;
-        }*/
+            var query = products.Where(q => q.Price >= minPrice && q.Price <= maxPrice);
+
+            if (!attributeValueIDs.Any())
+                return query;
+
+            var requiredCount = attributeValueIDs.Count;
+
+            return query.Where(product => product.AttributeValues.Count(av => attributeValueIDs.Contains(av.AttributeValueID)) == requiredCount);
+        }
     }
 }

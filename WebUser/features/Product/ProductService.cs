@@ -1,5 +1,6 @@
 using WebUser.Data;
 using WebUser.features.Cart.Interfaces;
+using WebUser.PricingService.DTO;
 
 namespace WebUser.features.Cart
 {
@@ -7,38 +8,30 @@ namespace WebUser.features.Cart
     {
         private readonly DB_Context dbcontext;
 
-        //private readonly EmailService emailService;
-
-        public ProductService(
-            DB_Context context /*, EmailService emailService*/
-        )
+        public ProductService(DB_Context context)
         {
             dbcontext = context;
-            //this.emailService = emailService;
         }
 
-        /*public async Task NotifyUsersAsync(int productId)
+        public double CalculatePriceWithCumulativeDiscounts(int productId, double basePrice, List<DiscountRecordDTO> appliedDiscounts)
         {
-            var product = await dbcontext.Products.Include(p => p.Wishlist).ThenInclude(up => up.User).FirstOrDefaultAsync(p => p.Id == productId);
-
-            if (product == null)
+            if (appliedDiscounts.Any())
             {
-                var usersToNotify = await product.Wishlist.Select(up => up.User).Distinct().ToListAsync();
-
-                foreach (var user in usersToNotify)
-                {
-                    var userWishlistProducts = await user.Wishlist.Where(up => up.Product.Stock > 0).Select(up => up.Product).ToListAsync();
-
-                    var message = $"User {user.Email}, your products from the wishlist became available again!\nProduct list:\n";
-
-                    foreach (var wishProd in userWishlistProducts)
-                    {
-                        message += $"{wishProd.Name}: {wishProd.Price}\n";
-                    }
-
-                    await emailService.SendEmailAsync(user.Email, "Wishlist Product Available", message);
-                }
+                return 0;
             }
-        }*/
+            var productDiscounts = appliedDiscounts.Where(d => d.ProductId == productId).ToList();
+
+            double totalAbsoluteDiscount = productDiscounts
+                .Where(d => d.ValueTypes.Contains(DiscountValueType.Absolute))
+                .Sum(d => d.AbsoluteDiscountValue ?? 0);
+
+            double totalPercentageDiscount = productDiscounts
+                .Where(d => d.ValueTypes.Contains(DiscountValueType.Percentage))
+                .Sum(d => d.PercentDiscountValue ?? 0);
+
+            double price = basePrice - totalAbsoluteDiscount - totalPercentageDiscount;
+
+            return price;
+        }
     }
 }

@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using WebUser.Data;
@@ -15,7 +14,7 @@ namespace WebUser.features.Point.Functions
             public int Value { get; set; }
             public bool IsExpirable { get; set; }
             public DateTime ExpireDate { get; set; }
-            public ClaimsPrincipal UserClaims { get; set; }
+            public string UserId { get; set; } = string.Empty;
         }
 
         //handler
@@ -31,8 +30,8 @@ namespace WebUser.features.Point.Functions
 
             public async Task<PointDTO> Handle(CreatePointCommand request, CancellationToken cancellationToken)
             {
-                var userId = request.UserClaims.FindFirstValue(ClaimTypes.NameIdentifier);
-                var user = await userManager.FindByIdAsync(userId);
+                var user = await userManager.FindByEmailAsync(request.UserId);
+
 
 
                 var point = new E.Point

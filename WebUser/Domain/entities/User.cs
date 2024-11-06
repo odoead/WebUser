@@ -16,10 +16,11 @@ namespace WebUser.Domain.entities
         [StringLength(60, ErrorMessage = "Surname can't be longer than 60 characters")]
         public string? LastName { get; set; }
         public DateTime DateCreated { get; set; }
-        public ICollection<Point> Points { get; set; } = new List<Point>();
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
-        public ICollection<ProductUserNotificationRequest> RequestNotifications { get; set; }
+        public List<Point> Points { get; set; } = new List<Point>();
+        public List<Order> Orders { get; set; } = new List<Order>();
+        public List<Review> Reviews { get; set; } = new List<Review>();
+        public List<ProductUserNotificationRequest> RequestNotifications { get; set; }
+        public Cart Cart { get; set; }
 
     }
 }

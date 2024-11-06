@@ -1,6 +1,7 @@
 namespace WebUser.features.User;
 
 using System.Net;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,13 @@ public class UserController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> SetNotifier([FromBody] SetNotifierCommand command)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User not found.");
+        }
+
+        command.UserId = userId;
         await mediator.Send(command);
         return NoContent();
     }

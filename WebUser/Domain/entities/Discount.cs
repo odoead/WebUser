@@ -29,7 +29,7 @@ namespace WebUser.Domain.entities
 
         public static bool IsActive(Discount discount)
         {
-            var isValid = discount.ActiveFrom <DateTime.UtcNow&&discount.ActiveTo>DateTime.UtcNow;
+            var isValid = discount.ActiveFrom < DateTime.UtcNow && discount.ActiveTo > DateTime.UtcNow;
             return isValid;
         }
     }

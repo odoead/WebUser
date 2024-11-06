@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.features.Category.Exceptions;
 using WebUser.features.Coupon.DTO;
+using WebUser.features.Coupon.Exceptions;
 using WebUser.features.Product.DTO;
 using E = WebUser.Domain.entities;
 
@@ -32,7 +32,7 @@ namespace WebUser.features.Coupon.Functions
             {
                 var coupon =
                     await dbcontext.Coupons.FirstOrDefaultAsync(q => q.ID == request.Id, cancellationToken: cancellationToken)
-                    ?? throw new CategoryNotFoundException(request.Id);
+                    ?? throw new CouponNotFoundException(request.Id);
                 var couponDTO = new CouponDTO
                 {
                     ID = coupon.ID,

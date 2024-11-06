@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Cart.DTO;
 using WebUser.features.Cart.Exceptions;
-using WebUser.features.CartItem.DTO;
 
 namespace WebUser.features.Cart.functions
 {

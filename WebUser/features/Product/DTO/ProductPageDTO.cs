@@ -12,8 +12,8 @@ public class ProductPageDTO
     public string Description { get; set; }
     public double BasePrice { get; set; }
     public bool IsPurchasable { get; set; }
-    public List<ImageDTO> Images { get; set; }
-    public List<AttributeNameValueDTO> AttributeValues { get; set; }
-    public List<DiscountMinDTO> Discounts { get; set; }
-    public List<PromotionProductPageDTO> Promotions { get; set; }
+    public List<ImageDTO> Images { get; set; } = new List<ImageDTO>();
+    public List<AttributeNameValueDTO> AttributeValues { get; set; } = new List<AttributeNameValueDTO>();
+    public List<DiscountMinDTO> Discounts { get; set; } = new List<DiscountMinDTO>();
+    public List<PromotionProductPageDTO> Promotions { get; set; } = new List<PromotionProductPageDTO>();
 }

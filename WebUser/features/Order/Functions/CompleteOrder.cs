@@ -25,17 +25,17 @@ public class CompleteOrder
         {
             var order =
                 await _dbcontext
-                    .Orders.Include(o => o.OrderProduct)
+                    .Orders.Include(o => o.OrderProducts)
                     .ThenInclude(oi => oi.Product)
                     .FirstOrDefaultAsync(o => o.ID == request.Id, cancellationToken) ?? throw new OrderNotFoundException(request.Id);
 
             //check f order havent been completed yet
-            if (order.Status == true)
+            if (order.IsCompleted == true)
             {
                 throw new InvalidOperationException($"Order {request.Id} is already completed.");
             }
 
-            foreach (var orderItem in order.OrderProduct)
+            foreach (var orderItem in order.OrderProducts)
             {
                 var product = orderItem.Product;
 
@@ -50,7 +50,7 @@ public class CompleteOrder
             }
 
             //set as completed
-            order.Status = true;
+            order.IsCompleted = true;
 
             _dbcontext.Orders.Update(order);
             await _dbcontext.SaveChangesAsync(cancellationToken);

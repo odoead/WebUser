@@ -25,9 +25,9 @@ namespace WebUser.Domain.entities
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
         public int? BuyQuantity { get; set; }
         public bool? IsFirstOrder { get; set; }
-        public ICollection<PromotionCategory> Categories { get; set; } = new List<PromotionCategory>();
-        public ICollection<PromotionProduct> Products { get; set; } = new List<PromotionProduct>();
-        public ICollection<PromotionAttrValue> AttributeValues { get; set; } = new List<PromotionAttrValue>();
+        public List<PromotionCategory> Categories { get; set; } = new List<PromotionCategory> { };
+        public List<PromotionProduct> ConditionProducts { get; set; } = new List<PromotionProduct> { };
+        public List<PromotionAttrValue> AttributeValues { get; set; } = new List<PromotionAttrValue> { };
 
         //actions
         [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
@@ -47,10 +47,10 @@ namespace WebUser.Domain.entities
 
         [Range(1, int.MaxValue, ErrorMessage = "Only positive number allowed")]
         public int? PointsExpireDays { get; set; }
-        public ICollection<PromotionPromProduct> PromProducts { get; set; } = new List<PromotionPromProduct>();
+        public List<PromotionPromProduct> ActionProducts { get; set; } = new List<PromotionPromProduct> { };
         public static bool IsActive(Promotion promotion)
         {
-            var isValid = Promotion.IsActive(promotion);
+            var isValid = promotion.ActiveFrom < DateTime.UtcNow && promotion.ActiveTo > DateTime.UtcNow;
             return isValid;
         }
     }

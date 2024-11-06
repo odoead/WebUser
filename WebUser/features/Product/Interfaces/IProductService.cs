@@ -1,4 +1,10 @@
-﻿namespace WebUser.features.Cart.Interfaces
+namespace WebUser.features.Cart.Interfaces
 {
-    public interface IProductService { }
+    using WebUser.PricingService.DTO;
+
+    public interface IProductService
+    {
+
+        public double CalculatePriceWithCumulativeDiscounts(int productId, double basePrice, List<DiscountRecordDTO> appliedDiscounts);
+    }
 }

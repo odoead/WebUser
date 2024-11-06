@@ -1,6 +1,7 @@
 namespace WebUser.features.Point;
 
 using System.Net;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,13 @@ public class PointController : ControllerBase
     [ProducesResponseType(typeof(PointDTO), (int)HttpStatusCode.Created)]
     public async Task<ActionResult> Create([FromBody] CreatePoint.CreatePointCommand command)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User not found.");
+        }
+        command.UserId = userId;
+
         var result = await mediator.Send(command);
         return CreatedAtRoute("GetPointByID", new { pointId = result.ID }, result);
     }

@@ -1,6 +1,5 @@
 namespace WebUser.features.User.Functions;
 
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -13,7 +12,7 @@ public class SetNotifier
 {
     public class SetNotifierCommand : IRequest
     {
-        public ClaimsPrincipal UserClaims { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public int ProductId { get; set; }
     }
 
@@ -29,18 +28,18 @@ public class SetNotifier
 
         public async Task Handle(SetNotifierCommand request, CancellationToken cancellationToken)
         {
-            var userId = request.UserClaims.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByEmailAsync(request.UserId);
+
 
             if (
                 await dbcontext.RequestNotifications.AnyAsync(
-                    q => q.UserID != userId && q.ProductID != request.ProductId,
+                    q => q.UserID != request.UserId && q.ProductID != request.ProductId,
                     cancellationToken: cancellationToken
                 )
             )
             {
                 await dbcontext.RequestNotifications.AddAsync(
-                    new ProductUserNotificationRequest { ProductID = request.ProductId, UserID = userId },
+                    new ProductUserNotificationRequest { ProductID = request.ProductId, UserID = request.UserId },
                     cancellationToken
                 );
                 await dbcontext.SaveChangesAsync(cancellationToken);

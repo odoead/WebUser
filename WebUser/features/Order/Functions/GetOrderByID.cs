@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.features.Category.Exceptions;
 using WebUser.features.Order.DTO;
-using WebUser.features.OrderProduct.DTO;
 using WebUser.features.Point.DTO;
 using WebUser.features.Product.DTO;
 
@@ -34,7 +33,7 @@ namespace WebUser.features.Order.Functions
                 var order =
                     await dbcontext
                         .Orders.Include(q => q.Points)
-                        .Include(q => q.OrderProduct)
+                        .Include(q => q.OrderProducts)
                         .ThenInclude(q => q.Product)
                         .FirstOrDefaultAsync(q => q.ID == request.Id, cancellationToken) ?? throw new CategoryNotFoundException(request.Id);
 
@@ -45,12 +44,12 @@ namespace WebUser.features.Order.Functions
                     DeliveryAddress = order.DeliveryAddress,
                     DeliveryMethod = order.DeliveryMethod,
                     PaymentMethod = order.PaymentMethod,
-                    Status = order.Status,
+                    Status = order.IsCompleted,
                     Payment = order.Payment,
                     UserID = order.UserID,
                     PointsUsed = order.PointsUsed,
                     OrderProducts = order
-                        .OrderProduct.Select(op => new OrderProductDTO
+                        .OrderProducts.Select(op => new OrderProductDTO
                         {
                             ID = op.ProductID,
                             Amount = op.Amount,

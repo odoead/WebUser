@@ -11,7 +11,7 @@ namespace WebUser.features.User.DTO
         public DateTime DateCreated { get; set; }
         public string UserName { get; set; }
         public string? Email { get; set; }
-        public List<OrderUserDTO>? Orders { get; set; } = new List<OrderUserDTO>();
-        public List<PointMinDTO>? Points { get; set; } = new List<PointMinDTO>();
+        public List<OrderUserDTO> Orders { get; set; } = new List<OrderUserDTO>();
+        public List<PointMinDTO> Points { get; set; } = new List<PointMinDTO>();
     }
 }

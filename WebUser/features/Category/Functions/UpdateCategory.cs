@@ -9,6 +9,7 @@ using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.Category.DTO;
 using WebUser.features.Category.Exceptions;
+using WebUser.shared.extentions;
 
 public class UpdateCategory
 {
@@ -54,6 +55,24 @@ public class UpdateCategory
             request.PatchDoc.ApplyTo(categoryToUpdate);
 
             category.Name = categoryToUpdate.Name;
+
+            await ManyToManyEntitiesUpdater.UpateManyToManyRelationsAsync<Category, AttributeName, AttributeNameCategory>(
+            dbcontext,
+            category,
+                category.Attributes,
+                categoryToUpdate.AttributeNameIds,
+                (category, attribute) =>
+                    new AttributeNameCategory
+                    {
+                        AttributeName = attribute,
+                        AttributeNameID = attribute.ID,
+                        Category = category,
+                        CategoryID = category.ID,
+                    },
+                async ids =>
+                    await dbcontext.AttributeNames.Where(av => ids.Contains(av.ID)).ToListAsync(cancellationToken)
+            );
+            //---------------
             if (categoryToUpdate.AttributeNameIds != null)
             {
                 category.Attributes.Clear();

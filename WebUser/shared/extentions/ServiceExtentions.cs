@@ -19,11 +19,8 @@ namespace WebUser.common.extentions
     {
         public static void ConfigureCORS(this IServiceCollection services) =>
             services.AddCors(opt => opt.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
-
         public static void ConfigureIISIntegration(this IServiceCollection services) => services.Configure<IISOptions>(_ => { });
-
         public static void ConfigureLoggerService(this IServiceCollection services) => services.AddSingleton<ILoggerManager, LoggerManager>();
-
         public static void ConfigureSqlConnection(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");

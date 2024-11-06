@@ -38,13 +38,12 @@ public class GetAllProductsThumbnail
 
         public async Task<PagedList<ProductThumbnailDTO>> Handle(GetAllProductsThumbnailQuery query, CancellationToken cancellationToken)
         {
-            // Initialize a list to store the category IDs to search
             List<int> categoryIds = new List<int>();
 
-            // If CategoryId is null, get the child categories of the first category
+            // If CategoryId is null then  get the child categories of the first category
             if (query.CategoryId == null)
             {
-                var rootCategoryId = 1; // Replace with logic to get the actual root category if necessary
+                var rootCategoryId = 1; //root
                 var childCategories = await service.Category.GetAllGenChildCategories(rootCategoryId);
                 categoryIds.Add(rootCategoryId);
                 categoryIds.AddRange(childCategories.Select(c => c.ID));
@@ -65,30 +64,36 @@ public class GetAllProductsThumbnail
                 }
             }
 
-            // Query the products based on the resolved category IDs
             var productsQuery = dbcontext
                 .Products.Include(p => p.AttributeValues)
                 .ThenInclude(av => av.AttributeValue)
                 .ThenInclude(av => av.AttributeName)
                 .ThenInclude(an => an.Categories)
+                .Include(q => q.Images)
+                .Include(q => q.Discounts)
                 .Where(p => p.AttributeValues.Any(av => av.AttributeValue.AttributeName.Categories.Any(c => categoryIds.Contains(c.CategoryID))))
                 .SearchByName(query.Parameters.RequestName)
                 .Filter(query.Parameters.AttributeValueIDs, query.Parameters.MinPrice, query.Parameters.MaxPrice);
 
-            var srcProducts = await productsQuery
+            var d = await productsQuery.ToListAsync();
+
+            var srcProducts = productsQuery
                 .Skip((query.Parameters.PageNumber - 1) * query.Parameters.PageSize)
                 .Take(query.Parameters.PageSize)
-                .Sort(query.Parameters.OrderBy)
-                .ToListAsync(cancellationToken);
+                .Sort(query.Parameters.OrderBy).AsQueryable();
 
-            // Manual mapping from Products to ProductThumbnailDTO
+            var appliedDiscounts = await service.Pricing.ApplyDiscountAsync(srcProducts.Select(q => q.ID).ToList());
+
+
+            #region mapping
             var dtoProducts = srcProducts
                 .Select(product => new ProductThumbnailDTO
                 {
                     ID = product.ID,
                     Name = product.Name,
                     BasePrice = product.Price,
-                    IsPurchasable = product.Stock > 0 && product.Stock > product.ReservedStock,
+                    AfterDiscountPrice = service.Product.CalculatePriceWithCumulativeDiscounts(product.ID, product.Price, appliedDiscounts),
+                    IsPurchasable = Product.IsPurchasable(product, 1),
                     Images = product.Images.Select(image => new ImageDTO { ID = image.ID, ImageContent = image.ImageContent }).ToList(),
                     Discounts = product
                         .Discounts.Select(discount => new DiscountMinDTO
@@ -101,7 +106,7 @@ public class GetAllProductsThumbnail
                         .ToList(),
                 })
                 .ToList();
-
+            #endregion
             var pagedList = PagedList<ProductThumbnailDTO>.PaginateList(
                 source: dtoProducts,
                 totalCount: await productsQuery.CountAsync(cancellationToken),
@@ -111,31 +116,5 @@ public class GetAllProductsThumbnail
 
             return pagedList;
         }
-        /*public async Task<PagedList<ProductThumbnailDTO>> Handle(GetAllProductsThumbnailQuery query, CancellationToken cancellationToken)
-        {
-            var queryCategoriesId=query.IncludeChildCategories ? query.CategoryId : await service.Category.GetAllGenChildCategories(query.CategoryId);
-            var pagedList = PagedList<ProductThumbnailDTO>.PaginateList(
-                source: mapper.Map<ICollection<ProductThumbnailDTO>>(
-                    await dbcontext
-                        .Products.Include(q => q.AttributeValues)
-                        .ThenInclude(q => q.AttributeValue)
-                        .ThenInclude(q => q.AttributeName)
-                        .ThenInclude(q => q.Categories)
-                        .Where(p =>
-                            p.AttributeValues.Any(av => av.AttributeValue.AttributeName.Categories.Any(c => c.CategoryID == query.CategoryId))
-                        )
-                        .Skip((query.Parameters.PageNumber - 1) * query.Parameters.PageSize)
-                        .Take(query.Parameters.PageSize)
-                        .SearchByName(query.Parameters.RequestName)
-                        .Filter(query.Parameters.AttributeValueIDs, query.Parameters.MinPrice, query.Parameters.MaxPrice)
-                        .Sort(query.Parameters.OrderBy)
-                        .ToListAsync(cancellationToken)
-                ),
-                totalCount: await dbcontext.AttributeNames.CountAsync(cancellationToken: cancellationToken),
-                pageNumber: query.Parameters.PageNumber,
-                pageSize: query.Parameters.PageSize
-            );
-            return pagedList;
-        }*/
     }
 }

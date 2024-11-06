@@ -62,7 +62,7 @@ namespace WebUser.features.Cart
             var parent = childCategory.ParentCategory;
             if (parent != null)
             {
-                GetChildCategoriesRec(parent, parentCategories);
+                GetParentCategoriesRec(parent, parentCategories);
             }
         }
     }

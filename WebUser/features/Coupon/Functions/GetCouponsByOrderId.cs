@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
+using WebUser.Domain.exceptions;
 using WebUser.features.Coupon.DTO;
-using WebUser.features.Coupon.Exceptions;
 using WebUser.features.Order.Exceptions;
 using WebUser.features.Product.DTO;
 using E = WebUser.Domain.entities;
@@ -29,14 +29,14 @@ namespace WebUser.features.Coupon.Functions
 
             public async Task<ICollection<CouponDTO>> Handle(GetCouponByOrderIDQuery request, CancellationToken cancellationToken)
             {
-                if (await dbcontext.Orders.AnyAsync(q => q.ID == request.OrderId, cancellationToken: cancellationToken))
+                if (!await dbcontext.Orders.AnyAsync(q => q.ID == request.OrderId, cancellationToken: cancellationToken))
                 {
                     throw new OrderNotFoundException(request.OrderId);
                 }
 
                 var coupons =
                     await dbcontext.Coupons.Where(q => q.Order.ID == request.OrderId).ToListAsync(cancellationToken: cancellationToken)
-                    ?? throw new CouponNotFoundException(-1);
+                    ?? throw new RelatedEntityNotFoundException(nameof(E.Coupon), nameof(GetCouponsByOrderId), "Handle");
 
                 var couponDTOs = new List<CouponDTO>();
                 foreach (var coupon in coupons)

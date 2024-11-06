@@ -1,9 +1,10 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
+using WebUser.Domain.exceptions;
 using WebUser.features.Cart.Exceptions;
-using WebUser.features.CartItem.Exceptions;
 using WebUser.features.Product.Exceptions;
+using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Cart.functions
 {
@@ -42,9 +43,9 @@ namespace WebUser.features.Cart.functions
                         .FirstOrDefaultAsync(
                             q => q.CartID == request.CartId && q.ProductID == request.ProductId,
                             cancellationToken: cancellationToken
-                        ) ?? throw new CartItemNotFoundException(-1);
+                        ) ?? throw new RelatedEntityNotFoundException(nameof(E.CartItem), nameof(ChangeAmountRemoveProductFromCart), "Handle");
 
-                if (request.NewAmount < 0)
+                if (request.NewAmount <= 0)
                 {
                     dbcontext.CartItems.Remove(cartItem);
                 }
@@ -57,7 +58,7 @@ namespace WebUser.features.Cart.functions
                     cartItem.Amount = request.NewAmount;
                 }
                 await dbcontext.SaveChangesAsync(cancellationToken);
-                //
+
             }
         }
     }

@@ -1,5 +1,3 @@
-using WebUser.features.CartItem.DTO;
-
 namespace WebUser.features.Cart.DTO
 {
     public class CartDTO

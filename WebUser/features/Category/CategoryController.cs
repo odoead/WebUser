@@ -66,6 +66,7 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
 
+
     [HttpPost("{id:int}/attribute/{attributeid:int}/add")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
@@ -124,11 +125,11 @@ public class CategoryController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:int}/filters/search")]
+    [HttpGet("filters/search")]
     [ProducesResponseType(typeof(SearchAttributeFiltersDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetSearchFilters(int id, [FromQuery] string productName)
     {
-        var query = new GetSearchFiltesCatalog.GetSearchFiltesCatalogQuery { Id = id, ProductName = productName };
+        var query = new GetSearchFiltesCatalog.GetSearchFiltesCatalogQuery { RequestName = productName };
         var result = await mediator.Send(query);
         return Ok(result);
     }

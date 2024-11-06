@@ -2,6 +2,7 @@ namespace WebUser.features.AttributeName;
 
 using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebUser.features.AttributeName.DTO;
 using WebUser.features.AttributeName.functions;
@@ -24,7 +25,7 @@ public class AttributeNameController : ControllerBase
     }
 
     [HttpPost]
-    // [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [ValidationFilter]
     [ProducesResponseType(typeof(AttributeNameDTO), (int)HttpStatusCode.Created)]
     public async Task<ActionResult> Create([FromBody] CreateAttributeName.CreateAttributeNameCommand command)
@@ -55,7 +56,7 @@ public class AttributeNameController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType((int)HttpStatusCode.NoContent)]
     public async Task<ActionResult> Delete(int id)
     {

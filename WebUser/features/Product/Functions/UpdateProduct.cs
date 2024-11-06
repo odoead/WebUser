@@ -49,7 +49,7 @@ public class UpdateProduct
             product.Description = updateProduct.Description;
             product.Name = updateProduct.Name;
             product.Price = updateProduct.Price;
-            product.Stock = updateProduct.Stock;
+            product.Stock = updateProduct.Stock < 0 ? 0 : updateProduct.Stock;
 
             ////----
 
@@ -89,7 +89,7 @@ public class UpdateProduct
                 async ids => await dbcontext.AttributeValues.Where(av => ids.Contains(av.ID)).ToListAsync(cancellationToken)
             );
 
-            
+
 
             await dbcontext.SaveChangesAsync(cancellationToken);
         }

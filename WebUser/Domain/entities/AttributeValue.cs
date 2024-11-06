@@ -14,7 +14,7 @@ namespace WebUser.Domain.entities
         [ForeignKey("AttributeNameID")]
         public AttributeName AttributeName { get; set; }
         public int AttributeNameID { get; set; }
-        public ICollection<ProductAttributeValue> Products { get; set; } = new List<ProductAttributeValue>();
-        public ICollection<PromotionAttrValue> Promotions { get; set; } = new List<PromotionAttrValue>();
+        public List<ProductAttributeValue> Products { get; set; } = new List<ProductAttributeValue>();
+        public List<PromotionAttrValue> Promotions { get; set; } = new List<PromotionAttrValue>();
     }
 }

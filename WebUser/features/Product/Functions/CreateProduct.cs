@@ -8,6 +8,7 @@ using WebUser.features.Discount.DTO;
 using WebUser.features.Image.DTO;
 using WebUser.features.Product.DTO;
 using WebUser.features.Promotion_TODO.DTO;
+using WebUser.shared.extentions;
 using E = WebUser.Domain.entities;
 
 namespace WebUser.features.Product.Functions
@@ -37,11 +38,10 @@ namespace WebUser.features.Product.Functions
             public async Task<ProductDTO> Handle(CreateProductCommand request, CancellationToken cancellationToken)
             {
                 var attributeValues = await dbcontext
-                    .ProductAttributeValues.Where(q => request.AttributeValuesID.Contains(q.AttributeValueID))
+                    .AttributeValues.Where(q => request.AttributeValuesID.Contains(q.ID))
                     .ToListAsync(cancellationToken: cancellationToken);
                 var product = new E.Product
                 {
-                    AttributeValues = attributeValues,
                     Description = request.Description,
                     Name = request.Name,
                     Price = request.Price,
@@ -49,6 +49,19 @@ namespace WebUser.features.Product.Functions
                     DateCreated = DateTime.UtcNow,
                     ReservedStock = 0,
                 };
+
+                await ManyToManyEntitiesUpdater.UpateManyToManyRelationsAsync<E.Product, E.AttributeValue, E.ProductAttributeValue>(
+                    dbcontext, product, product.AttributeValues, request.AttributeValuesID,
+                    (prod, attrValue) =>
+                    new E.ProductAttributeValue
+                    {
+                        Product = prod,
+                        ProductID = prod.ID,
+                        AttributeValue = attrValue,
+                        AttributeValueID = attrValue.ID,
+                    },
+               async ids => await dbcontext.AttributeValues.Where(av => ids.Contains(av.ID)).ToListAsync(cancellationToken));
+
                 await dbcontext.Products.AddAsync(product, cancellationToken);
                 await dbcontext.SaveChangesAsync(cancellationToken);
 

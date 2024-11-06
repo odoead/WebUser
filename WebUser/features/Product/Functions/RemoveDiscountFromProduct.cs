@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
-using WebUser.features.discount.Exceptions;
+using WebUser.Domain.exceptions;
 using WebUser.features.Product.Exceptions;
 
 namespace WebUser.features.discount.Functions
@@ -36,7 +36,7 @@ namespace WebUser.features.discount.Functions
                     await dbcontext.Discounts.FirstOrDefaultAsync(
                         q => q.Product.ID == request.ProductID && q.ID == request.DiscountID,
                         cancellationToken: cancellationToken
-                    ) ?? throw new DiscountNotFoundException(-1);
+                    ) ?? throw new RelatedEntityNotFoundException(nameof(Discount), nameof(RemoveDiscountFromProduct), "Handle");
                 dbcontext.Discounts.Remove(discount);
                 await dbcontext.SaveChangesAsync(cancellationToken);
             }

@@ -32,7 +32,7 @@ namespace WebUser.features.Cart.functions
                     await dbcontext.Carts.Where(q => q.ID == request.CartId).FirstOrDefaultAsync(cancellationToken)
                     ?? throw new CartNotFoundException(request.CartId);
                 var product =
-                    await dbcontext.Products.Where(q => q.ID == request.CartId).FirstOrDefaultAsync(cancellationToken)
+                    await dbcontext.Products.Where(q => q.ID == request.ProductId).FirstOrDefaultAsync(cancellationToken)
                     ?? throw new ProductNotFoundException(request.ProductId);
                 var cartItem = cart.Items.FirstOrDefault(q => q.ProductID == request.ProductId && q.CartID == request.CartId);
                 if (cartItem == null)
@@ -43,7 +43,7 @@ namespace WebUser.features.Cart.functions
                         Cart = cart,
                         Product = product,
                     };
-                    cart.Items.Add(cartItem);
+                    cart.Items.Add(newCartItem);
                 }
                 else
                 {

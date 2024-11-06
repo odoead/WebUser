@@ -1,9 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
+using WebUser.Domain.exceptions;
 using WebUser.features.Cart.DTO;
-using WebUser.features.Cart.Exceptions;
-using WebUser.features.CartItem.DTO;
 using WebUser.features.User.Exceptions;
 
 namespace WebUser.features.Cart.functions
@@ -36,7 +35,7 @@ namespace WebUser.features.Cart.functions
                         .Carts.Include(q => q.Items)
                         .ThenInclude(q => q.Product)
                         .Where(q => q.User.Id == request.UserId)
-                        .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? throw new CartNotFoundException(-1);
+                        .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? throw new RelatedEntityNotFoundException(nameof(Cart), nameof(GetCartByUserId), "Handle");
 
                 var results = new CartDTO
                 {

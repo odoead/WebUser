@@ -406,6 +406,9 @@ namespace WebUser.Migrations
                     b.Property<int>("DeliveryMethod")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
                     b.Property<double>("Payment")
                         .HasColumnType("float");
 
@@ -414,9 +417,6 @@ namespace WebUser.Migrations
 
                     b.Property<int?>("PointsUsed")
                         .HasColumnType("int");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
 
                     b.Property<string>("UserID")
                         .IsRequired()
@@ -977,7 +977,7 @@ namespace WebUser.Migrations
             modelBuilder.Entity("WebUser.Domain.entities.OrderProduct", b =>
                 {
                     b.HasOne("WebUser.Domain.entities.Order", "Order")
-                        .WithMany("OrderProduct")
+                        .WithMany("OrderProducts")
                         .HasForeignKey("OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1095,7 +1095,7 @@ namespace WebUser.Migrations
                         .IsRequired();
 
                     b.HasOne("WebUser.Domain.entities.Promotion", "Promotion")
-                        .WithMany("Products")
+                        .WithMany("ConditionProducts")
                         .HasForeignKey("PromotionID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1114,7 +1114,7 @@ namespace WebUser.Migrations
                         .IsRequired();
 
                     b.HasOne("WebUser.Domain.entities.Promotion", "Promotion")
-                        .WithMany("PromProducts")
+                        .WithMany("ActionProducts")
                         .HasForeignKey("PromotionID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1173,7 +1173,7 @@ namespace WebUser.Migrations
 
             modelBuilder.Entity("WebUser.Domain.entities.Order", b =>
                 {
-                    b.Navigation("OrderProduct");
+                    b.Navigation("OrderProducts");
 
                     b.Navigation("Points");
                 });
@@ -1208,13 +1208,13 @@ namespace WebUser.Migrations
 
             modelBuilder.Entity("WebUser.Domain.entities.Promotion", b =>
                 {
+                    b.Navigation("ActionProducts");
+
                     b.Navigation("AttributeValues");
 
                     b.Navigation("Categories");
 
-                    b.Navigation("Products");
-
-                    b.Navigation("PromProducts");
+                    b.Navigation("ConditionProducts");
                 });
 
             modelBuilder.Entity("WebUser.Domain.entities.User", b =>

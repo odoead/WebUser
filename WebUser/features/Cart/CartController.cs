@@ -1,6 +1,7 @@
 namespace WebUser.features.Cart.functions;
 
 using System.Net;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,21 @@ public class CartController : ControllerBase
     {
         var query = new GetCartByUserId.GetCartByUserIDQuery { UserId = id };
         var result = await mediator.Send(query);
+        return Ok(result);
+    }
+    [HttpGet("user/{id}")]
+    [Authorize(Roles = "User")]
+    [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetUserPublicCartItems([FromBody] GetUserPublicCartItems.GetUserPublicCartItemsQuery command)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User notfound.");
+        }
+
+        command.UserId = userId;
+        var result = await mediator.Send(command);
         return Ok(result);
     }
 

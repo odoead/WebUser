@@ -1,4 +1,4 @@
-﻿namespace WebUser.features.Coupon.DTO
+namespace WebUser.features.Coupon.DTO
 {
     public class UpdateCouponDTO
     {
@@ -7,7 +7,7 @@
         public DateTime CreatedAt { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveTo { get; set; }
-        public double DiscountVal { get; set; }
-        public float DiscountPercent { get; set; }
+        public double? DiscountVal { get; set; }
+        public float? DiscountPercent { get; set; }
     }
 }

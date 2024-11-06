@@ -84,6 +84,7 @@ namespace WebUser.features.User
 
         private async Task<List<Claim>> GetClaims()
         {
+            //username = email
             var claims = new List<Claim> { new(ClaimTypes.Name, user.UserName) };
             var roles = await userManager.GetRolesAsync(user);
             foreach (var role in roles)

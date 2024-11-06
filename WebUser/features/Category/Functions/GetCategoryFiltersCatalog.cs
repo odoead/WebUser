@@ -46,7 +46,7 @@ public class GetCategoryFiltersCatalog
             var parentRoute = await service.Category.GetParentCategoriesLine(request.Id);
 
             var attributes = request.IncludeChildCategories
-                ? await GetAttributesForChildCategories(request.Id, cancellationToken)
+                ? await GetAttributesForSelectedAndChildCategories(request.Id, cancellationToken)
                 : category.Attributes.Select(a => a.AttributeName).ToList();
 
             var attributeNameValues = attributes
@@ -54,8 +54,7 @@ public class GetCategoryFiltersCatalog
                 {
                     AttributeName = new AttributeNameMinDTO { Name = attribute.Name, ID = attribute.ID },
                     Attributes = attribute.AttributeValues.Select(av => new AttributeValueDTO { ID = av.ID, Value = av.Value }).ToList(),
-                })
-                .ToList();
+                }).ToList();
 
             return new CategoryAttributeFiltersDTO
             {
@@ -68,16 +67,14 @@ public class GetCategoryFiltersCatalog
             };
         }
 
-        private async Task<List<AttributeName>> GetAttributesForChildCategories(int categoryId, CancellationToken cancellationToken)
+        private async Task<List<AttributeName>> GetAttributesForSelectedAndChildCategories(int categoryId, CancellationToken cancellationToken)
         {
             var childCategories = await service.Category.GetAllGenChildCategories(categoryId);
             var selectedCategoryIds = childCategories.Select(c => c.ID).Append(categoryId).ToList();
 
             return await dbcontext
                 .AttributeNames.Include(a => a.AttributeValues)
-                .Where(a => selectedCategoryIds.Contains(a.ID))
-                .Distinct()
-                .ToListAsync(cancellationToken);
+                .Where(a => a.Categories.Any(ac => selectedCategoryIds.Contains(ac.CategoryID))).Distinct().ToListAsync(cancellationToken);
         }
     }
 }

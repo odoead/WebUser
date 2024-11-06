@@ -48,7 +48,7 @@ namespace WebUser.Data
             builder
                 .Entity<PromotionProduct>()
                 .HasOne(pav => pav.Promotion)
-                .WithMany(p => p.Products)
+                .WithMany(p => p.ConditionProducts)
                 .HasForeignKey(pav => pav.PromotionID)
                 .OnDelete(DeleteBehavior.Cascade);
             builder
@@ -62,7 +62,7 @@ namespace WebUser.Data
             builder
                 .Entity<PromotionPromProduct>()
                 .HasOne(pav => pav.Promotion)
-                .WithMany(p => p.PromProducts)
+                .WithMany(p => p.ActionProducts)
                 .HasForeignKey(pav => pav.PromotionID)
                 .OnDelete(DeleteBehavior.Cascade);
             builder
@@ -121,30 +121,7 @@ namespace WebUser.Data
                 .WithMany(av => av.RequestNotifications)
                 .HasForeignKey(pav => pav.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
-            /*modelBuilder
-                .Entity<Promotion>()
-                .HasMany(c => c.AttributeValues)
-                .WithMany(s => s.Promotions)
-                .UsingEntity(j => j.ToTable("PromotionAttrValue"));
-            modelBuilder
-                .Entity<Promotion>()
-                .HasMany(c => c.Categories)
-                .WithMany(s => s.Promotions)
-                .UsingEntity(j => j.ToTable("PromotionCategory"));
-            modelBuilder.Entity<Promotion>(w =>
-            {
-                w.HasMany<Product>(c => c.Products).WithMany(s => s.Promotions);
-                w.ToTable("PromotionProduct");
-            });
-            modelBuilder.Entity<Promotion>(w =>
-            {
-                w.HasMany<Product>(c => c.PromoProducts).WithMany(s => s.PromoPromotions);
-                w.ToTable("PromotionPromProduct");
-            });*/
-            /*modelBuilder.Entity<Promotion>()
-                .HasMany(c => c.PromoProducts)
-                .WithMany(s => s.Promotions)
-                .UsingEntity(j => j.ToTable("PromotionPromProduct"));*/
+
         }
 
         public DbSet<AttributeName> AttributeNames { get; set; }

@@ -8,39 +8,40 @@ using WebUser.Data;
 using WebUser.features.AttributeName.DTO;
 using WebUser.features.AttributeValue.DTO;
 using WebUser.features.Category.DTO;
-using WebUser.shared.RepoWrapper;
+using WebUser.features.Product.extensions;
 
 public class GetSearchFiltesCatalog
 {
     //input
     public class GetSearchFiltesCatalogQuery : IRequest<SearchAttributeFiltersDTO>
     {
-        public int Id { get; set; }
-        public string ProductName { get; set; }
+        public string RequestName { get; set; }
     }
 
     //handler
     public class Handler : IRequestHandler<GetSearchFiltesCatalogQuery, SearchAttributeFiltersDTO>
     {
         private readonly DB_Context dbcontext;
-        private readonly IServiceWrapper service;
 
-        public Handler(DB_Context context, IServiceWrapper service)
+        public Handler(DB_Context context)
         {
             dbcontext = context;
-            this.service = service;
         }
 
         public async Task<SearchAttributeFiltersDTO> Handle(GetSearchFiltesCatalogQuery request, CancellationToken cancellationToken)
         {
-            var products = await dbcontext
+            //select all products with suitable names (no paging)
+            var rr = dbcontext
                 .Products.Include(p => p.AttributeValues)
                 .ThenInclude(pav => pav.AttributeValue)
                 .ThenInclude(av => av.AttributeName)
                 .ThenInclude(an => an.Categories)
                 .ThenInclude(anc => anc.Category)
-                .ToListAsync(cancellationToken: cancellationToken);
+                .SearchByName(request.RequestName).AsQueryable();
+            var products = await rr
+            .ToListAsync(cancellationToken: cancellationToken);
 
+            //get all unique attr names 
             var attributeNames = products.SelectMany(p => p.AttributeValues.Select(av => av.AttributeValue.AttributeName)).Distinct().ToList();
 
             var attributeNameValues = attributeNames

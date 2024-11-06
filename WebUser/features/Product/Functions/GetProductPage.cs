@@ -49,6 +49,8 @@ public class GetProductPage
                     .ThenInclude(p => p.Promotion)
                     .FirstOrDefaultAsync(p => p.ID == request.Id, cancellationToken) ?? throw new ProductNotFoundException(request.Id);
 
+            var appliedDiscounts = await service.Pricing.ApplyDiscountAsync(new List<int> { request.Id });
+
             var attributeNameValues = GetAttributeNameValues(product);
 
             var parentRoute = await GetProductCategoriesRoute(product);
@@ -59,9 +61,10 @@ public class GetProductPage
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                Stock = product.Stock,
+                AfterDiscountPrice = service.Product.CalculatePriceWithCumulativeDiscounts(product.ID, product.Price, appliedDiscounts),
+                Stock = product.Stock - product.ReservedStock,
                 ReservedStock = product.ReservedStock,
-                IsPurchasable = product.Stock > 0 && product.Stock > product.ReservedStock,
+                IsPurchasable = Product.IsPurchasable(product, 1),
                 Images = product.Images.Select(img => new ImageDTO { ID = img.ID, ImageContent = img.ImageContent }).ToList(),
                 AttributeValues = attributeNameValues,
                 Discounts = product

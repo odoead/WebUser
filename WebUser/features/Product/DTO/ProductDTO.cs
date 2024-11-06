@@ -16,10 +16,10 @@ namespace WebUser.features.Product.DTO
         public int ReservedStock { get; set; }
         public bool IsPurchasable { get; set; }
         public DateTime DateCreated { get; set; }
-        public List<ImageDTO> Images { get; set; }
-        public List<AttributeNameValueDTO> AttributeValues { get; set; }
-        public List<DiscountMinDTO> Discounts { get; set; }
-        public List<CouponMinDTO> Coupons { get; set; }
-        public List<PromotionMinDTO> Promotions { get; set; }
+        public List<ImageDTO> Images { get; set; } = new List<ImageDTO>();
+        public List<AttributeNameValueDTO> AttributeValues { get; set; } = new List<AttributeNameValueDTO>();
+        public List<DiscountMinDTO> Discounts { get; set; } = new List<DiscountMinDTO>();
+        public List<CouponMinDTO> Coupons { get; set; } = new List<CouponMinDTO>();
+        public List<PromotionMinDTO> Promotions { get; set; } = new List<PromotionMinDTO>();
     }
 }

@@ -1,6 +1,7 @@
 namespace WebUser.features.Product;
 
 using System.Net;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -67,6 +68,12 @@ public class ProductController : ControllerBase
     [ProducesResponseType(typeof(DiscountDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> AddReview(int id, [FromBody] AddReviewToProduct.AddReviewToProductCommand command)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User not found.");
+        }
+        command.UserId = userId;
         command.ProductID = id;
         var result = await mediator.Send(command);
         return Ok(result);
@@ -121,7 +128,7 @@ public class ProductController : ControllerBase
     [ProducesResponseType(typeof(PagedList<ProductThumbnailDTO>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetAllThumbnailProducts(
         [FromQuery] ProductRequestParameters parameters,
-        int? categoryId = 0,
+        int? categoryId = 1,
         bool includeChildCategories = false
     )
     {

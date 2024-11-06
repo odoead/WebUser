@@ -10,12 +10,12 @@ namespace WebUser.Domain.entities
 
         [Required]
         public string Name { get; set; }
-        public ICollection<AttributeNameCategory> Attributes { get; set; } = new List<AttributeNameCategory>();
+        public List<AttributeNameCategory> Attributes { get; set; } = new List<AttributeNameCategory>();
 
         [ForeignKey("ParentCategoryID")]
         public Category? ParentCategory { get; set; }
         public int? ParentCategoryID { get; set; }
-        public ICollection<Category> Subcategories { get; set; } = new List<Category>();
-        public ICollection<PromotionCategory> Promotions { get; set; } = new List<PromotionCategory>();
+        public List<Category> Subcategories { get; set; } = new List<Category>();
+        public List<PromotionCategory> Promotions { get; set; } = new List<PromotionCategory>();
     }
 }

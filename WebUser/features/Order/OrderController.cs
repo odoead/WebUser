@@ -1,6 +1,7 @@
 namespace WebUser.features.Order;
 
 using System.Net;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using WebUser.features.Order.Functions;
 using WebUser.shared;
 using WebUser.shared.Action_filter;
 using WebUser.shared.RequestForming.features;
+using static WebUser.features.Order.Functions.CompleteOrder;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -30,9 +32,29 @@ public class OrderController : ControllerBase
     [Authorize]
     public async Task<ActionResult> Create([FromBody] CreateOrder.CreateOrderCommand command)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User notfound.");
+        }
+        command.UserId = userId;
+
         var result = await mediator.Send(command);
         return CreatedAtRoute("GetCouponByID", new { couponId = result.ID }, result);
     }
+
+    [HttpPost("{id:int}")]
+    [Authorize]
+    public async Task<ActionResult> Complete(int id)
+    {
+        var command = new CompleteOrderCommand { Id = id };
+        await mediator.Send(command);
+        return NoContent();
+    }
+
+
+
+
 
     [HttpGet]
     [Paging]

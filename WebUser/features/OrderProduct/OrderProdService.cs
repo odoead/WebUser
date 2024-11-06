@@ -69,10 +69,7 @@ namespace WebUser.features.OrderProduct
                 orderProducts.Add(orderProduct);
             }
 
-            /*foreach (var item in activatedCoupons)
-            {
-                
-            }*/
+
             return orderProducts;
         }
     }

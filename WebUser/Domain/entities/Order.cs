@@ -18,7 +18,7 @@ namespace WebUser.Domain.entities
         public int PaymentMethod { get; set; }
 
         [Required]
-        public bool Status { get; set; }
+        public bool IsCompleted { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }
@@ -32,7 +32,7 @@ namespace WebUser.Domain.entities
         [ForeignKey("UserID")]
         public User User { get; set; }
         public string UserID { get; set; }
-        public ICollection<Point> Points { get; set; } = new List<Point>();
-        public ICollection<OrderProduct> OrderProduct { get; set; } = new List<OrderProduct>();
+        public List<Point> Points { get; set; } = new List<Point>();
+        public List<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct> { };
     }
 }

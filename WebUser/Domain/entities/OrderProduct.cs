@@ -22,6 +22,6 @@ namespace WebUser.Domain.entities
         [ForeignKey("OrderID")]
         public Order Order { get; set; }
         public int OrderID { get; set; }
-        public ICollection<Coupon> ActivatedCoupons { get; set; } = new List<Coupon>();
+        public List<Coupon> ActivatedCoupons { get; set; } = new List<Coupon>();
     }
 }

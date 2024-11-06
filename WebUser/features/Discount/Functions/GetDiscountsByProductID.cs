@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
+using WebUser.Domain.exceptions;
 using WebUser.features.discount.DTO;
-using WebUser.features.discount.Exceptions;
 using WebUser.features.Product.DTO;
 using WebUser.features.Product.Exceptions;
 using E = WebUser.Domain.entities;
@@ -40,7 +40,7 @@ namespace WebUser.features.discount.Functions
                     await dbcontext
                         .Discounts.Include(q => q.Product)
                         .Where(q => q.ProductID == request.ProductId)
-                        .ToListAsync(cancellationToken: cancellationToken) ?? throw new DiscountNotFoundException(-1);
+                        .ToListAsync(cancellationToken: cancellationToken) ?? throw new RelatedEntityNotFoundException(nameof(E.Discount), nameof(GetDiscountsByProductID), "Handle");
 
                 var discountDTOs = new List<DiscountDTO>();
                 foreach (var discount in discounts)
