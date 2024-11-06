@@ -1,8 +1,6 @@
 namespace Test.ComponentTests.AttributeName;
 
-using System;
 using System.Threading.Tasks;
-
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
@@ -11,23 +9,12 @@ using WebUser.features.AttributeName.functions;
 
 public class CreateAttributeNameTests
 {
-
-
-    private readonly DB_Context _dbContext;
-    private readonly AddAttributeValueToAttrName.Handler _handler;
-
-    public CreateAttributeNameTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task NewAttributeName_ShouldCreateAndReturnDTO()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var handler = new CreateAttributeName.Handler(_dbContext);
         var command = new CreateAttributeName.CreateAttributeNameCommand { Name = "Test Attribute", Description = "Test Description" };
 
@@ -52,7 +39,9 @@ public class CreateAttributeNameTests
     [Fact]
     public async Task ExistingAttributeName_ShouldNotCreateDuplicateAndReturnDTO()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var existingAttributeName = new AttributeName { Name = "Existing Attribute", Description = "Existing Description" };
         await _dbContext.AttributeNames.AddAsync(existingAttributeName);
         await _dbContext.SaveChangesAsync();
@@ -60,11 +49,7 @@ public class CreateAttributeNameTests
         var handler = new CreateAttributeName.Handler(_dbContext);
         var command = new CreateAttributeName.CreateAttributeNameCommand { Name = "Existing Attribute", Description = "Existing Description" };
 
-        var expectedDto = new AttributeNameDTO
-        {
-            Name = "Existing Attribute",
-            Description = "Existing Description",
-        };
+        var expectedDto = new AttributeNameDTO { Name = "Existing Attribute", Description = "Existing Description" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

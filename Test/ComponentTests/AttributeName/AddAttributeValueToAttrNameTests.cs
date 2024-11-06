@@ -1,39 +1,28 @@
 namespace Test.ComponentTests.AttributeName;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.AttributeName.Exceptions;
 using WebUser.features.AttributeName.functions;
 using Xunit;
+using static WebUser.features.Category.Functions.GetCategoryFiltersCatalog;
 
 public class AddAttributeValueToAttrNameTests
 {
-
-
-    private readonly DB_Context _dbContext;
-    private readonly AddAttributeValueToAttrName.Handler _handler;
-
-    public AddAttributeValueToAttrNameTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
-    }
+    public AddAttributeValueToAttrNameTests() { }
 
     [Fact]
     public async Task ExistingAttributeName_NewAttributeValue_AddsNewAttributeValue()
     {
         // ARRANGE
         var command = new AddAttributeValueToAttrName.AddAttributeValueCommand { AttributeValue = "NewValue", AttributeNameID = 1 };
-
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var attributeName = new AttributeName
         {
             ID = 1,
@@ -42,6 +31,8 @@ public class AddAttributeValueToAttrNameTests
         };
         _dbContext.AttributeNames.Add(attributeName);
         await _dbContext.SaveChangesAsync();
+        var _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
+        var request = new GetCategoryFiltersCatalogQuery { Id = 1, IncludeChildCategories = true };
 
         // ACT
         await _handler.Handle(command, CancellationToken.None);
@@ -59,7 +50,9 @@ public class AddAttributeValueToAttrNameTests
     {
         // ARRANGE
         var command = new AddAttributeValueToAttrName.AddAttributeValueCommand { AttributeValue = "ExistingValue", AttributeNameID = 1 };
-
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
         var attributeName = new AttributeName
         {
             ID = 1,
@@ -88,6 +81,9 @@ public class AddAttributeValueToAttrNameTests
     {
         // ARRANGE
         var command = new AddAttributeValueToAttrName.AddAttributeValueCommand { AttributeValue = "NewValue", AttributeNameID = 999 };
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
 
         // ACT
         // ASSERT

@@ -1,10 +1,7 @@
 namespace Test.ComponentTests.AttributeValue;
 
-using System;
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
-using WebUser.features.AttributeName.functions;
 using WebUser.features.AttributeValue;
 using WebUser.features.AttributeValue.DTO;
 using WebUser.features.AttributeValue.functions;
@@ -12,20 +9,13 @@ using WebUser.shared.RequestForming.features;
 
 public class GetAllAttributeValuesTests
 {
-    private readonly DB_Context _dbContext;
-    private readonly AddAttributeValueToAttrName.Handler _handler;
-
-    public GetAllAttributeValuesTests()
-    {
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task ShouldReturnPaginatedList()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new GetAllAttrValues.Handler(_dbContext);
         var attributeValues = new List<AttributeValue>
         {
             new()

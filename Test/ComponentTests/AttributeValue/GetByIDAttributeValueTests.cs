@@ -1,9 +1,6 @@
 namespace Test.ComponentTests.AttributeValue;
 
-using System;
 using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.AttributeValue.DTO;
@@ -12,22 +9,13 @@ using WebUser.features.AttributeValue.functions;
 
 public class GetByIDAttributeValueTests
 {
-
-    private readonly DB_Context _dbContext;
-    private readonly GetByIDAttributeValue.Handler _handler;
-
-    public GetByIDAttributeValueTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new GetByIDAttributeValue.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task ExistingId_ReturnsAttributeValueDTO()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new GetByIDAttributeValue.Handler(_dbContext);
         var attributeValue = new AttributeValue
         {
             ID = 1,
@@ -53,12 +41,13 @@ public class GetByIDAttributeValueTests
     [Fact]
     public async Task NonExistingId_ThrowsAttributeValueNotFoundException()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new GetByIDAttributeValue.Handler(_dbContext);
         var query = new GetByIDAttributeValue.GetByIDAttrValueQuery { Id = 999 };
 
         // Act & Assert
         await Assert.ThrowsAsync<AttributeValueNotFoundException>(() => _handler.Handle(query, CancellationToken.None));
     }
-
-
 }

@@ -1,9 +1,6 @@
 namespace Test.ComponentTests.AttributeName;
 
-using System;
 using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.AttributeName.DTO;
@@ -12,28 +9,19 @@ using WebUser.features.AttributeName.functions;
 
 public class GetByIDAttributeValueTests
 {
-
-    private readonly DB_Context _dbContext;
-    private readonly GetByIDAttributeName.Handler _handler;
-
-    public GetByIDAttributeValueTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new GetByIDAttributeName.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task ExistingId_ReturnsAttributeNameDTO()
     {
-        // Arrange
+        // ARRANGE
+
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var attributeName = new AttributeName { ID = 1, Name = "TestAttribute" };
         _dbContext.AttributeNames.Add(attributeName);
         await _dbContext.SaveChangesAsync();
 
         var expectedDto = new AttributeNameDTO { Id = 1, Name = "TestAttribute" };
-
+        var _handler = new GetByIDAttributeName.Handler(_dbContext);
         var query = new GetByIDAttributeName.GetByIDAttrNameQuery { Id = 1 };
 
         // Act
@@ -48,12 +36,13 @@ public class GetByIDAttributeValueTests
     [Fact]
     public async Task NonExistingId_ThrowsAttributeNameNotFoundException()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var query = new GetByIDAttributeName.GetByIDAttrNameQuery { Id = 999 };
+        var _handler = new GetByIDAttributeName.Handler(_dbContext);
 
         // Act & Assert
         await Assert.ThrowsAsync<AttributeNameNotFoundException>(() => _handler.Handle(query, CancellationToken.None));
     }
-
-
 }

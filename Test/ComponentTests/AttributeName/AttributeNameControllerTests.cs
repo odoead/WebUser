@@ -4,7 +4,6 @@ using Moq;
 using WebUser.features.AttributeName;
 using WebUser.features.AttributeName.functions;
 
-// Your namespace here
 public class AttributeNameControllerTests
 {
     private readonly Mock<IMediator> mediatorMock;

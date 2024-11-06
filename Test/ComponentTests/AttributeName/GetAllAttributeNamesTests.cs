@@ -1,9 +1,6 @@
 namespace Test.ComponentTests.AttributeName;
 
-using System;
-
 using Bogus;
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.AttributeName;
@@ -13,22 +10,12 @@ using WebUser.shared.RequestForming.features;
 
 public class GetAllAttributeNamesTests
 {
-
-    private readonly DB_Context _dbContext;
-    private readonly AddAttributeValueToAttrName.Handler _handler;
-
-    public GetAllAttributeNamesTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new AddAttributeValueToAttrName.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task ExistingList_ShouldReturnPaginatedList()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
         var attributeValues = new List<AttributeValue>
         {
             new AttributeValue
@@ -121,8 +108,7 @@ public class GetAllAttributeNamesTests
                 Id = 2,
             },
         };
-        //_mapperMock.Setup(m => m.Map<ICollection<AttributeNameDTO>>(It.IsAny<List<AttributeName>>())).Returns(dtos);
-        //var handler = new GetAllAttrNameAsync.Handler(_dbContext, _mapperMock.Object);
+
         var handler = new GetAllAttrNameAsync.Handler(_dbContext);
         var query = new GetAllAttrNameAsync.GetAllAttrNameQuery
         {

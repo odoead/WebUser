@@ -1,9 +1,6 @@
 namespace Test.ComponentTests.AttributeValue;
 
-using System;
 using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
 using WebUser.Domain.entities;
 using WebUser.features.AttributeValue.Exceptions;
@@ -11,29 +8,18 @@ using WebUser.features.AttributeValue.functions;
 
 public class UpdateAttributeValueTests
 {
-
-
-    private readonly DB_Context _dbContext;
-    private readonly UpdateAttributeValue.Handler _handler;
-
-    public UpdateAttributeValueTests()
-    {
-
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new UpdateAttributeValue.Handler(_dbContext);
-    }
-
     [Fact]
     public async Task ExistingAttributeValue_UpdatesValue()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateAttributeValue.Handler(_dbContext);
         var attributeValue = new AttributeValue { ID = 1, Value = "Old Value" };
         _dbContext.AttributeValues.Add(attributeValue);
         await _dbContext.SaveChangesAsync();
 
         var command = new UpdateAttributeValue.UpdateAttributeValueCommand(1, "New Value");
-
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -46,7 +32,10 @@ public class UpdateAttributeValueTests
     [Fact]
     public async Task AttributeValueNonExists_ThrowsAttributeValueNotFoundException()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateAttributeValue.Handler(_dbContext);
         var command = new UpdateAttributeValue.UpdateAttributeValueCommand(999, "New Value");
 
         // Act & Assert

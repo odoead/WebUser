@@ -1,6 +1,5 @@
 namespace Test.ComponentTests.Category;
 
-using System;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using WebUser.Data;
@@ -11,20 +10,16 @@ using WebUser.features.Category.Functions;
 
 public class UpdateCategoryTests
 {
-    private readonly DB_Context _dbContext;
-    private readonly UpdateCategory.Handler _handler;
 
-    public UpdateCategoryTests()
-    {
-        var options = new DbContextOptionsBuilder<DB_Context>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-        _dbContext = new DB_Context(options);
-        _handler = new UpdateCategory.Handler(_dbContext);
-    }
+
 
     [Fact]
     public async Task CategoryNotFound_ThrowsCategoryNotFoundException()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var _dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateCategory.Handler(_dbContext);
         var command = new UpdateCategory.UpdateCategoryCommand { Id = 1, PatchDoc = new JsonPatchDocument<UpdateCategoryDTO>() };
         // Act & Assert
         await Assert.ThrowsAsync<CategoryNotFoundException>(() => _handler.Handle(command, CancellationToken.None));
@@ -33,10 +28,13 @@ public class UpdateCategoryTests
     [Fact]
     public async Task UpdatesCategory()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateCategory.Handler(dbContext);
         var category = new Category { ID = 1, Name = "Test Category" };
-        _dbContext.Categories.Add(category);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Categories.Add(category);
+        await dbContext.SaveChangesAsync();
 
         var patchDoc = new JsonPatchDocument<UpdateCategoryDTO>();
         patchDoc.Replace(c => c.Name, "Updated Category");
@@ -46,14 +44,17 @@ public class UpdateCategoryTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var updatedCategory = await _dbContext.Categories.FindAsync(1);
+        var updatedCategory = await dbContext.Categories.FindAsync(1);
         Assert.Equal("Updated Category", updatedCategory.Name);
     }
 
     [Fact]
     public async Task UpdatesCategory_EditsNewAttributes()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateCategory.Handler(dbContext);
         var category = new Category { ID = 1, Name = "Test Category" };
         var attribute = new AttributeName
         {
@@ -77,9 +78,9 @@ public class UpdateCategoryTests
                 CategoryID = category.ID,
             },
         };
-        _dbContext.Categories.Add(category);
-        _dbContext.AttributeNames.Add(attribute);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Categories.Add(category);
+        dbContext.AttributeNames.Add(attribute);
+        await dbContext.SaveChangesAsync();
 
         var patchDoc = new JsonPatchDocument<UpdateCategoryDTO>();
         patchDoc.Replace(q => q.AttributeNameIds, 1);
@@ -89,19 +90,22 @@ public class UpdateCategoryTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var updatedCategory = await _dbContext.Categories.Include(q => q.Attributes).FirstOrDefaultAsync(q => q.ID == 1);
+        var updatedCategory = await dbContext.Categories.Include(q => q.Attributes).FirstOrDefaultAsync(q => q.ID == 1);
         Assert.Equal(1, updatedCategory.Attributes.Count);
         var resultAttributeName = new List<AttributeNameCategory>();
         Assert.Contains(updatedCategory.Attributes, a => a.AttributeNameID == 1);
 
-        Assert.Equal(1, await _dbContext.AttributeNameCategories.CountAsync());
-        Assert.Equal(attribute.ID, await _dbContext.AttributeNameCategories.Select(q => q.AttributeNameID).FirstOrDefaultAsync());
+        Assert.Equal(1, await dbContext.AttributeNameCategories.CountAsync());
+        Assert.Equal(attribute.ID, await dbContext.AttributeNameCategories.Select(q => q.AttributeNameID).FirstOrDefaultAsync());
     }
 
     [Fact]
     public async Task UpdatesCategory_EditsSubcategories()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateCategory.Handler(dbContext);
         var subcategories = new List<Category>
         {
             new Category { ID = 1, Name = "Test Category 1" },
@@ -115,9 +119,9 @@ public class UpdateCategoryTests
             Subcategories = subcategories,
         };
 
-        await _dbContext.Categories.AddRangeAsync(subcategories);
-        await _dbContext.Categories.AddAsync(category);
-        await _dbContext.SaveChangesAsync();
+        await dbContext.Categories.AddRangeAsync(subcategories);
+        await dbContext.Categories.AddAsync(category);
+        await dbContext.SaveChangesAsync();
 
         var patchDoc = new JsonPatchDocument<UpdateCategoryDTO>();
         patchDoc.Replace(q => q.SubcategoryIds, new List<int> { 1, 2 });
@@ -127,16 +131,19 @@ public class UpdateCategoryTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var updatedCategory = await _dbContext.Categories.Include(q => q.Subcategories).FirstOrDefaultAsync(q => q.ID == 1);
+        var updatedCategory = await dbContext.Categories.Include(q => q.Subcategories).FirstOrDefaultAsync(q => q.ID == 1);
         Assert.Equal(2, updatedCategory.Subcategories.Count);
-        var expectedSubcategories = await _dbContext.Categories.Where(q => q.ID == 1 || q.ID == 2).ToListAsync();
+        var expectedSubcategories = await dbContext.Categories.Where(q => q.ID == 1 || q.ID == 2).ToListAsync();
         Assert.Equal(expectedSubcategories, updatedCategory.Subcategories);
     }
 
     [Fact]
     public async Task UpdatesCategory_EditsParentcategory()
     {
-        // Arrange
+        // ARRANGE
+        var dbOption = InmemoryTestDBGenerator.CreateDbContextOptions();
+        var dbContext = new DB_Context(dbOption);
+        var _handler = new UpdateCategory.Handler(dbContext);
         var parent = new Category { ID = 1, Name = "Test Category 1" };
         var category1 = new Category { ID = 2, Name = "Test Category 2" };
 
@@ -147,8 +154,8 @@ public class UpdateCategoryTests
             ParentCategory = parent,
         };
 
-        await _dbContext.Categories.AddRangeAsync(parent, category, category1);
-        await _dbContext.SaveChangesAsync();
+        await dbContext.Categories.AddRangeAsync(parent, category, category1);
+        await dbContext.SaveChangesAsync();
 
         var patchDoc = new JsonPatchDocument<UpdateCategoryDTO>();
         patchDoc.Replace(q => q.ParentCategoryId, 2);
@@ -158,7 +165,7 @@ public class UpdateCategoryTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var updatedCategory = await _dbContext.Categories.Include(q => q.Subcategories).FirstOrDefaultAsync(q => q.ID == 1);
+        var updatedCategory = await dbContext.Categories.Include(q => q.Subcategories).FirstOrDefaultAsync(q => q.ID == 1);
         Assert.Equal(2, updatedCategory.ParentCategoryID);
         Assert.Equal(new List<int> { 1 }, updatedCategory.ParentCategory.Subcategories.Select(q => q.ID));
     }
