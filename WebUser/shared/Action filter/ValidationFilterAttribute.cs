@@ -10,12 +10,16 @@ namespace WebUser.shared
         {
             var action = context.RouteData.Values["action"];
             var controller = context.RouteData.Values["controller"];
-            var param = context.ActionArguments.SingleOrDefault().Value;
 
-            if (param == null)
+            foreach (var arg in context.ActionArguments)
             {
-                context.Result = new BadRequestObjectResult($"Object is null. Controller: {controller}, action: {action}");
-                return;
+                var param = arg.Value;
+
+                if (param == null)
+                {
+                    context.Result = new BadRequestObjectResult($"Object is null. Controller: {controller}, action: {action}, parameter: {arg.Key}");
+                    return;
+                }
             }
 
             if (!context.ModelState.IsValid)
