@@ -21,8 +21,10 @@ C# multipurpose webshop project
 * Product Discounts
 * Product Coupons 
 * Promotions with dynamic conditions and actions
-* Products search, pagination 
-
+* Products search, pagination
+* Globar error handling, custom validation attributes
+* Tests for main project features
+* Swagger configuration
 
 # DB diagram
 ![diagram](https://github.com/user-attachments/assets/040fbcd6-62e6-4691-8eba-843916a6b047)
