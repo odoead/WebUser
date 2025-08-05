@@ -77,7 +77,10 @@ namespace WebUser.features.User
 
         private static SigningCredentials GetSigningCredentials()
         {
-            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET") ?? string.Empty);
+            var secretVal = "this is my custom Secret key for authentication";
+            // var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(secretVal) ?? string.Empty);
+             var key = Encoding.UTF8.GetBytes(secretVal);
+
             var secret = new SymmetricSecurityKey(key);
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }

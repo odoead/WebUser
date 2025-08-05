@@ -66,6 +66,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = Forward
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 //seed db

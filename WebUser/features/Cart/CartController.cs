@@ -56,7 +56,7 @@ public class CartController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:int}", Name = "GetCartByID")]
+    [HttpGet("{id:int}/admin", Name = "GetCartByID")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
     public async Task<ActionResult> GetByID(int id)
@@ -66,7 +66,7 @@ public class CartController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("user/{id}", Name = "GetCartByUserID")]
+    [HttpGet("user/{id}/admin", Name = "GetCartByUserID")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> GetByUserId(string id)
@@ -77,7 +77,7 @@ public class CartController : ControllerBase
     }
     [HttpGet("user/{id}")]
     [Authorize(Roles = "User")]
-    [ProducesResponseType(typeof(CartDTO), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(PublicCartItemsDTO), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> GetUserPublicCartItems([FromBody] GetUserPublicCartItems.GetUserPublicCartItemsQuery command)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

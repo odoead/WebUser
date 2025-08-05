@@ -96,8 +96,8 @@ namespace WebUser.common.extentions
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings["Issuer"],
-                        ValidAudience = jwtSettings["Audience"],
+                        ValidIssuer = jwtSettings["JWT:Issuer"],
+                        ValidAudience = jwtSettings["JWT:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     }
                 );

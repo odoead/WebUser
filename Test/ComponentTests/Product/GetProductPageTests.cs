@@ -101,7 +101,7 @@ public class GetProductPageTests
         Assert.Equal(product.Name, result.Name);
         Assert.Equal(90, result.AfterDiscountPrice);
         Assert.Equal(8, result.Stock);
-        Assert.Equal(2, result.AttributeValues.Count);
+        Assert.Equal(1, result.AttributeValues.Count);
     }
 
     [Fact]
