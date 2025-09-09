@@ -26,7 +26,7 @@ namespace WebUser.features.discount
             }
             if (discount.DiscountPercent > 0)
             {
-                newPrice = Math.Floor(newPrice * discount.DiscountVal.Value / 100);
+                newPrice = Math.Floor(newPrice * discount.DiscountPercent.Value / 100);
             }
             return newPrice;
         }
